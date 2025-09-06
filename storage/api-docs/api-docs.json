@@ -1,0 +1,50 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Mehan API Documentation",
+        "description": "API Documentation",
+        "contact": {
+            "email": "mob.dev@mehan.sa"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000/api",
+            "description": "localhost"
+        }
+    ],
+    "paths": {
+        "/users": {
+            "get": {
+                "tags": [
+                    "AuthController"
+                ],
+                "summary": "Get all users",
+                "description": "List of users",
+                "operationId": "72d65eb3ded6028ea4f16398dfe2c700",
+                "responses": {
+                    "200": {
+                        "description": "User retrieved successfully"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "Authorization",
+                "in": "header",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "AuthController",
+            "description": "AuthController"
+        }
+    ]
+}
