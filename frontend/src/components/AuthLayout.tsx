@@ -1,0 +1,108 @@
+import { SidebarProvider, SidebarTrigger } from "../components/ui/sidebar";
+import { AppSidebar } from "../components/AppSidebar";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
+import { Bell, Settings, LogOut } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import { Outlet } from "react-router-dom";
+import { useLanguage } from "../hooks/useLanguage";
+
+function AuthLayout() {
+    const { t } = useLanguage();
+
+    const handleLogout = () => {
+        // navigate("/");
+    };
+
+    return (
+        <SidebarProvider>
+            <div className="min-h-screen flex w-full">
+                <AppSidebar />
+
+                <div className="flex-1 flex flex-col">
+                    {/* Header */}
+                    <header className="h-16 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+                        <div className="flex justify-between items-center h-full px-4">
+                            <SidebarTrigger className="ms-2" />
+
+                            {/* Right Side Actions */}
+                            <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                                {/* Language Switcher */}
+                                <LanguageSwitcher />
+
+                                {/* Notifications */}
+                                <div className="relative">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="relative hover:bg-gray-100"
+                                    >
+                                        <Bell className="w-5 h-5" />
+                                        <Badge className="absolute -top-2 -right-2 rtl:-left-2 rtl:right-auto w-5 h-5 flex items-center justify-center p-0 bg-red-500 text-xs">
+                                            3
+                                        </Badge>
+                                    </Button>
+                                </div>
+
+                                {/* User Menu */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            className="flex items-center space-x-2 rtl:space-x-reverse hover:bg-gray-100"
+                                        >
+                                            <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center">
+                                                <span className="text-sm font-medium">
+                                                    A
+                                                </span>
+                                            </div>
+                                            <span className="text-sm font-medium text-gray-700">
+                                                {t("admin")}
+                                            </span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        align="end"
+                                        className="w-56"
+                                    >
+                                        <DropdownMenuLabel>
+                                            {t("myAccount")}
+                                        </DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="cursor-pointer">
+                                            <Settings className="w-4 h-4 me-2" />
+                                            {t("settings")}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={handleLogout}
+                                            className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
+                                        >
+                                            <LogOut className="w-4 h-4 me-2" />
+                                            {t("logout")}
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <main className="flex-1">
+                        <Outlet />
+                    </main>
+                </div>
+            </div>
+        </SidebarProvider>
+    );
+}
+
+export default AuthLayout;

@@ -4,8 +4,10 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::middleware('web')->group(function () {
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+});
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
-
-Route::get('/users', [AuthController::class, 'index'])->name('index');
