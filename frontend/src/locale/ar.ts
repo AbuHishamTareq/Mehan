@@ -26,6 +26,17 @@ const ar = {
     passwordPlaceholder: "أدخل كلمة المرور",
     rememberMe: "تذكرني",
     forgotPassword: "نسيت كلمة المرور؟",
+    emptyEmailPassword: "يجب ادخال جميع الحقول",
+    successLoginTitle: "تم تسجيل الدخول بنجاح",
+    failedLoginTitle: "خطأ في تسجيل الدخول",
+    succesLogin: "مرحبا بك في لوحة إدارة نظام ساعات",
+    failedLogin: "يرجى إدخال بيانات الحساب الصحيحة",
+
+    // Logout
+    successLogoutTitle: "تم تسجيل الخروج بنجاح",
+    failedLogoutTitle: "خطأ في تسجيل الخروج",
+    succesLogout: "نشكرك على استخدام نظام ساعات. نراك في وقت لاحق",
+    failedLogout: "حدث خطآ ما اثناء تسجيل الخروج",
 
     // Dashboard
     welcomeToDashboard: "مرحباً بك في لوحة التحكم",

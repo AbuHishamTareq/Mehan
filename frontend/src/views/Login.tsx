@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -27,10 +27,21 @@ const Login = () => {
     const { toast } = useToast();
     const { t, language } = useLanguage();
     const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+
+        if (!email && !password) {
+            toast({
+                title: t("failedLoginTitle"),
+                description: t("emptyEmailPassword"),
+                variant: "destructive",
+            });
+            setIsLoading(false);
+            return;
+        }
 
         // Get CSRF cookie from sanctum
         await api.get("/sanctum/csrf-cookie");
@@ -39,14 +50,14 @@ const Login = () => {
         try {
             await login(email, password, rememberMe, language);
             toast({
-                title: "Login Successful!",
-                description: "Welcome to SAAT CRM Admin Panel",
+                title: t("successLoginTitle"),
+                description: t("succesLogin"),
             });
-            <Navigate to={"/dashboard"} />;
+            navigate("/dashboard");
         } catch {
             toast({
-                title: "Login Failed",
-                description: "Please enter valid credentials",
+                title: t("failedLoginTitle"),
+                description: t("failedLogin"),
                 variant: "destructive",
             });
         } finally {

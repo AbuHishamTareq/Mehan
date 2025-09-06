@@ -5,6 +5,7 @@ import { AuthContext } from "../contexts/AuthContext";
 
 export const AuthProvider = ({ children }: { children: ReactNode}) => {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const login = async (email: string, password: string, rememberMe: boolean, language: string) => {
         const data = await AuthController.login(email, password, rememberMe, language);
@@ -17,6 +18,8 @@ export const AuthProvider = ({ children }: { children: ReactNode}) => {
             setUser(user);
         } catch {
             setUser(null);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -30,7 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode}) => {
     }
 
     const values = {
-        user, login, logout
+        user, login, logout, loading,
     }
 
     return (

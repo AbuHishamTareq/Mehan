@@ -15,17 +15,32 @@
         }
     ],
     "paths": {
-        "/users": {
+        "/login": {
             "get": {
                 "tags": [
                     "AuthController"
                 ],
-                "summary": "Get all users",
-                "description": "List of users",
-                "operationId": "72d65eb3ded6028ea4f16398dfe2c700",
+                "summary": "Login to SAAT CRM",
+                "description": "Login",
+                "operationId": "11f21d9311115567b54be5e8c50fbaee",
                 "responses": {
                     "200": {
-                        "description": "User retrieved successfully"
+                        "description": "User logged in successfully"
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "get": {
+                "tags": [
+                    "AuthController"
+                ],
+                "summary": "Logout from SAAT CRM",
+                "description": "Logout",
+                "operationId": "1deead8175ec826e4eff4671de92fbf3",
+                "responses": {
+                    "200": {
+                        "description": "User logged in successfully"
                     }
                 }
             }

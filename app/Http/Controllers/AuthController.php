@@ -25,9 +25,9 @@ class AuthController extends Controller
             ]
         );
 
-        $remember = $credentials['remember'] ?? false;
+        $remember = $credentials["remember"] ?? false;
 
-        unset($credentials['remember']);
+        unset($credentials["remember"]);
 
         if(!Auth::attempt($credentials, $remember)) {
             return response()->json([
@@ -38,7 +38,27 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return response()->json([
-            "success" => __("auth.login")
+            "success" => __("auth.login"),
+            "user" => [
+                "id"    => Auth::id(),
+                "name"  => Auth::user()->name,
+                "email" => Auth::user()->email,
+                // "role"  => Auth::user()->role ?? null,
+            ],
+        ]);
+    }
+
+    #[OA\Get(path: "/logout", tags: ["AuthController"], summary: "Logout from SAAT CRM", description: "Logout", responses: [ new OA\Response(response: 200, description: "User logged out successfully")])]
+    public function logout(Request $request) : JsonResponse {
+        App::setLocale($request->lang ?? "en");
+
+        Auth::guard("web")->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json([
+            "message" => __("auth.logout"),
         ]);
     }
 }

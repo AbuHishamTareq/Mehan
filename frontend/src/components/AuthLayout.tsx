@@ -3,7 +3,7 @@ import { AppSidebar } from "../components/AppSidebar";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
-import { Bell, Settings, LogOut } from "lucide-react";
+import { Bell, Settings, LogOut, Loader2 } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,15 +12,45 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import { useLanguage } from "../hooks/useLanguage";
+import { toast } from "../hooks/use-toast";
+import { useAuth } from "../hooks/useAuth";
 
 function AuthLayout() {
+    const { user, logout, loading } = useAuth();
     const { t } = useLanguage();
+    const navigate = useNavigate();
 
-    const handleLogout = () => {
-        // navigate("/");
+    const handleLogout = async () => {
+        try {
+            await logout();
+            toast({
+                title: t("successLogoutTitle"),
+                description: t("succesLogout"),
+            });
+
+            navigate("/login", { replace: true });
+        } catch {
+            toast({
+                title: t("failedLogoutTitle"),
+                description: t("failedLogout"),
+                variant: "destructive",
+            });
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        return <Navigate to={"/login"} replace />;
+    }
 
     return (
         <SidebarProvider>
@@ -65,7 +95,7 @@ function AuthLayout() {
                                                 </span>
                                             </div>
                                             <span className="text-sm font-medium text-gray-700">
-                                                {t("admin")}
+                                                {user?.name}
                                             </span>
                                         </Button>
                                     </DropdownMenuTrigger>
@@ -74,7 +104,7 @@ function AuthLayout() {
                                         className="w-56"
                                     >
                                         <DropdownMenuLabel>
-                                            {t("myAccount")}
+                                            {user?.email}
                                         </DropdownMenuLabel>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem className="cursor-pointer">

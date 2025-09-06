@@ -7,7 +7,10 @@ import ar from "../locale/ar";
 const translations = { en, ar };
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>(
+    (localStorage.getItem("language") as Language) || "en"
+  );
+
   const isRTL = language === "ar";
 
   const t = (key: string): string => {
@@ -15,6 +18,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    localStorage.setItem("language", language);
+    
     // Update document direction and language
     document.documentElement.dir = isRTL ? "rtl" : "ltr";
     document.documentElement.lang = language;

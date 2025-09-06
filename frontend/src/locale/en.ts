@@ -26,6 +26,17 @@ const en = {
     passwordPlaceholder: "Enter your password",
     rememberMe: "Remember me",
     forgotPassword: "Forgot password?",
+    emptyEmailPassword: "All fields are required",
+    successLoginTitle: "Logged in successfully",
+    failedLoginTitle: "Logged in failed",
+    succesLogin: "Welcome to SAAT CRM Admin Panel",
+    failedLogin: "Please enter valid credentials",
+
+    // Logout
+    successLogoutTitle: "Logged out successfully",
+    failedLogoutTitle: "Logout failed",
+    succesLogout: "Thank you for using SAAT system. See you later",
+    failedLogout: "An error occurred during logout",
 
     // Dashboard
     welcomeToDashboard: "Welcome to Dashboard",

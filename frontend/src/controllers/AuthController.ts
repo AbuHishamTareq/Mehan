@@ -1,12 +1,17 @@
 import api from "../api/axios";
 
 export const AuthController = {
-    async login(email: string, password: string, rememberMe: boolean, language: string) {
+    async login(
+        email: string,
+        password: string,
+        rememberMe: boolean,
+        language: string
+    ) {
         const { data } = await api.post("/api/login", {
             email,
             password,
             rememberMe,
-            language
+            language,
         });
 
         return data;
