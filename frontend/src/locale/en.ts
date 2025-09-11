@@ -15,6 +15,8 @@ const en = {
     // App Info
     appName: "SAAT",
     appSubtitle: "CRM System",
+    appTitle: "Service Management Platform",
+    copyright: "© 2025 Mehan. All rights reserved.",
 
     // Login
     welcomeBack: "Welcome Back",
@@ -53,6 +55,28 @@ const en = {
     // Staff
     staffTitle: "Staff Management",
     staffSubtitle: "Manage your team members and assignments",
+
+    //Settings
+    settingsTitle: "System Settings",
+    settingsSubtitle:
+        "Configure system settings, manage users, and assign permissions",
+    generalTitle: "General Setteings",
+    generalSubtitle: "Manage your system general settings",
+    usersTitle: "Users Managment",
+    usersSubtitle:
+        "Control and organize users, their roles, and system access efficiently.",
+    permissionsAndRolesTitle: "Roles & Permissions",
+    permissionsAndRolesSubtitle:
+        "Define and manage user roles and permissions to ensure secure and structured access control.",
+    permissionsTitle: "Permissions",
+    permissionsSubtitle:
+        "Manage and enforce granular access rights to ensure secure operations and protect sensitive data.",
+    departmentTitle: "Departments Managment",
+    departmentSubtitle:
+        "Organize and oversee departments to ensure clear structure and efficient operations.",
+    designationTitle: "Designations Managment",
+    designationSubtitle:
+        "Define and manage job designations to maintain role clarity and organizational structure.",
 };
 
 export default en;

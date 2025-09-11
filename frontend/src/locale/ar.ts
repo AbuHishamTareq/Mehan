@@ -13,12 +13,14 @@ const ar = {
     admin: "المدير",
 
     // App Info
-    appName: "سات",
+    appName: "ساعات",
     appSubtitle: "نظام إدارة العملاء",
+    appTitle: "منصة إدارة الخدمات",
+    copyright: "© ٢٠٢٥ مهن ، كل الحقوق محفوظة",
 
     // Login
     welcomeBack: "مرحباً بعودتك",
-    loginSubtitle: "سجل دخولك إلى حساب سات",
+    loginSubtitle: "سجل دخولك إلى نظام ساعات",
     email: "البريد الإلكتروني",
     password: "كلمة المرور",
     signIn: "تسجيل الدخول",
@@ -53,6 +55,27 @@ const ar = {
     // Staff
     staffTitle: "إدارة الموظفين",
     staffSubtitle: "إدارة أعضاء فريقك والمهام المخصصة لهم",
+
+    //Settings
+    settingsTitle: "ضيط النظام",
+    settingsSubtitle:
+        "تهيئة إعدادات النظام و إدارة المستخدمين و تعيين الصلاحيات",
+    generalTitle: "الضبط العام",
+    generalSubtitle: "إدارة الإعدادات العامة للنظام.",
+    usersTitle: "إدارة المستخدمين",
+    usersSubtitle: "تحكم ونظّم المستخدمين وأدوارهم ووصولهم إلى النظام بكفاءة.",
+    permissionsAndRolesTitle: "الأدوار والصلاحيات",
+    permissionsAndRolesSubtitle:
+        "حدد وأدر أدوار المستخدمين وأذوناتهم لضمان التحكم في الوصول بشكل آمن ومنظم.",
+    permissionsTitle: "الصلاحيات",
+    permissionsSubtitle:
+        "إدارة وفرض حقوق الوصول التفصيلية لضمان عمليات آمنة وحماية البيانات الحساسة.",
+    departmentTitle: "إدارة الأقسام",
+    departmentSubtitle:
+        "تنظيم ومتابعة الأقسام لضمان وضوح الهيكل التنظيمي وكفاءة العمليات.",
+    designationTitle: "إدارة المسميات الوظيفية",
+    designationSubtitle:
+        "تحديد وإدارة المسميات الوظيفية للحفاظ على وضوح الأدوار والهيكل التنظيمي.",
 };
 
 export default ar;

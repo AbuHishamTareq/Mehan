@@ -13,7 +13,7 @@ import {
 } from "../components/ui/card";
 import { Eye, EyeOff, Lock, Mail, Users } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
-import serviceWorkersBackground from "../assets/service-workers-bg.jpg";
+import serviceWorkersBackground from "../assets/images/service-workers-bg.jpg";
 import { useLanguage } from "../hooks/useLanguage";
 import { useAuth } from "../hooks/useAuth";
 import api from "../api/axios";
@@ -25,9 +25,10 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
-    const { t, language } = useLanguage();
+    const { t, language, isRTL } = useLanguage();
     const { login } = useAuth();
     const navigate = useNavigate();
+    const font = isRTL ? "font-arabic" : "font-english";
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,6 +39,7 @@ const Login = () => {
                 title: t("failedLoginTitle"),
                 description: t("emptyEmailPassword"),
                 variant: "destructive",
+                className: isRTL ? "font-arabic" : "font-english",
             });
             setIsLoading(false);
             return;
@@ -52,6 +54,7 @@ const Login = () => {
             toast({
                 title: t("successLoginTitle"),
                 description: t("succesLogin"),
+                className: isRTL ? "font-arabic" : "font-english",
             });
             navigate("/dashboard");
         } catch {
@@ -59,6 +62,7 @@ const Login = () => {
                 title: t("failedLoginTitle"),
                 description: t("failedLogin"),
                 variant: "destructive",
+                className: isRTL ? "font-arabic" : "font-english",
             });
         } finally {
             setIsLoading(false);
@@ -83,33 +87,41 @@ const Login = () => {
                         <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm animate-float">
                             <Users className="w-6 h-6 text-white" />
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-bold text-white">
+                        <div
+                            className={`${language === "ar" ? "pr-3" : "pl-2"}`}
+                        >
+                            <h1
+                                className={`text-3xl font-bold text-white ${font}`}
+                            >
                                 {t("appName")}
                             </h1>
-                            <p className="text-white/80 text-sm">
+                            <p className={`text-white/80 text-sm ${font}`}>
                                 {t("appSubtitle")}
                             </p>
                         </div>
                     </div>
-                    <p className="text-white/90 text-lg font-medium">
-                        Service Management Platform
+                    <p className={`text-white/90 text-lg font-medium ${font}`}>
+                        {t("appTitle")}
                     </p>
                 </div>
 
                 {/* Login Card */}
                 <Card className="bg-white/95 backdrop-blur-md border-white/30 shadow-elevated animate-slide-in-right">
                     <CardHeader>
-                        <CardTitle className="text-foreground text-2xl text-center">
+                        <CardTitle
+                            className={`text-foreground text-2xl text-center ${font}`}
+                        >
                             {t("welcomeBack")}
                         </CardTitle>
-                        <CardDescription className="text-muted-foreground text-center">
+                        <CardDescription
+                            className={`text-muted-foreground text-center ${font}`}
+                        >
                             {t("loginSubtitle")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleLogin} className="space-y-6">
-                            <div className="space-y-2">
+                            <div className={`space-y-2 ${font}`}>
                                 <Label
                                     htmlFor="email"
                                     className="text-foreground"
@@ -131,7 +143,7 @@ const Login = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
+                            <div className={`space-y-2 ${font}`}>
                                 <Label
                                     htmlFor="password"
                                     className="text-foreground"
@@ -170,7 +182,9 @@ const Login = () => {
 
                             {/* Remember me and Forgot password */}
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                                <div
+                                    className={`flex items-center space-x-2 rtl:space-x-reverse ${font}`}
+                                >
                                     <Checkbox
                                         id="remember-me"
                                         checked={rememberMe}
@@ -190,14 +204,16 @@ const Login = () => {
                                     variant="link"
                                     className="text-sm text-primary hover:text-primary-dark p-0 h-auto"
                                 >
-                                    {t("forgotPassword")}
+                                    <div className={font}>
+                                        {t("forgotPassword")}
+                                    </div>
                                 </Button>
                             </div>
 
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-primary hover:bg-primary-dark text-primary-foreground transition-all duration-300 hover:scale-105 hover:shadow-primary"
+                                className={`w-full bg-primary hover:bg-primary-dark text-primary-foreground transition-all duration-300 hover:scale-105 hover:shadow-primary ${font}`}
                             >
                                 {isLoading ? "Signing In..." : t("signIn")}
                             </Button>
@@ -206,8 +222,10 @@ const Login = () => {
                 </Card>
 
                 {/* Footer */}
-                <div className="text-center mt-8 text-white/80 text-sm animate-fade-in">
-                    <p>© 2025 SAAT CRM. All rights reserved.</p>
+                <div
+                    className={`text-center mt-8 text-white/80 text-sm animate-fade-in ${font}`}
+                >
+                    <p>{t("copyright")}</p>
                 </div>
             </div>
         </div>

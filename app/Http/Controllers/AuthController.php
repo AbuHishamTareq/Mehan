@@ -11,7 +11,7 @@ use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {
-    #[OA\Get(path: "/login", tags: ["AuthController"], summary: "Login to SAAT CRM", description: "Login", responses: [ new OA\Response(response: 200, description: "User logged in successfully")])]
+    #[OA\Get(path: "/login", tags: ["Backend APIs (Auth Controller)"], summary: "Login to SAAT CRM", description: "Login", responses: [ new OA\Response(response: 200, description: "User logged in successfully")])]
     public function login(Request $request) : JsonResponse {
         App::setLocale($request->language ?? 'en');
         $credentials = $request->validate(
@@ -48,7 +48,7 @@ class AuthController extends Controller
         ]);
     }
 
-    #[OA\Get(path: "/logout", tags: ["AuthController"], summary: "Logout from SAAT CRM", description: "Logout", responses: [ new OA\Response(response: 200, description: "User logged out successfully")])]
+    #[OA\Get(path: "/logout", tags: ["Backend APIs (Auth Controller)"], summary: "Logout from SAAT CRM", description: "Logout", responses: [ new OA\Response(response: 200, description: "User logged out successfully")])]
     public function logout(Request $request) : JsonResponse {
         App::setLocale($request->lang ?? "en");
 

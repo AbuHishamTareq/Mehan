@@ -19,7 +19,7 @@ import { useAuth } from "../hooks/useAuth";
 
 function AuthLayout() {
     const { user, logout, loading } = useAuth();
-    const { t } = useLanguage();
+    const { t, isRTL } = useLanguage();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -60,7 +60,11 @@ function AuthLayout() {
                 <div className="flex-1 flex flex-col">
                     {/* Header */}
                     <header className="h-16 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
-                        <div className="flex justify-between items-center h-full px-4">
+                        <div
+                            className={`flex justify-between items-center h-full px-4 ${
+                                isRTL ? "font-arabic" : "font-english"
+                            }`}
+                        >
                             <SidebarTrigger className="ms-2" />
 
                             {/* Right Side Actions */}
@@ -94,7 +98,7 @@ function AuthLayout() {
                                                     A
                                                 </span>
                                             </div>
-                                            <span className="text-sm font-medium text-gray-700">
+                                            <span className="text-sm font-medium text-gray-700 font-english">
                                                 {user?.name}
                                             </span>
                                         </Button>
@@ -104,12 +108,22 @@ function AuthLayout() {
                                         className="w-56"
                                     >
                                         <DropdownMenuLabel>
-                                            {user?.email}
+                                            <div className="font-english">
+                                                {user?.email}
+                                            </div>
                                         </DropdownMenuLabel>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem className="cursor-pointer">
                                             <Settings className="w-4 h-4 me-2" />
-                                            {t("settings")}
+                                            <div
+                                                className={
+                                                    isRTL
+                                                        ? "font-arabic"
+                                                        : "font-english"
+                                                }
+                                            >
+                                                {t("settings")}
+                                            </div>
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
@@ -117,7 +131,15 @@ function AuthLayout() {
                                             className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
                                         >
                                             <LogOut className="w-4 h-4 me-2" />
-                                            {t("logout")}
+                                            <div
+                                                className={
+                                                    isRTL
+                                                        ? "font-arabic"
+                                                        : "font-english"
+                                                }
+                                            >
+                                                {t("logout")}
+                                            </div>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

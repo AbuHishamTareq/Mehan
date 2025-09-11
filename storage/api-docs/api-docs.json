@@ -18,7 +18,7 @@
         "/login": {
             "get": {
                 "tags": [
-                    "AuthController"
+                    "Backend APIs (Auth Controller)"
                 ],
                 "summary": "Login to SAAT CRM",
                 "description": "Login",
@@ -33,14 +33,14 @@
         "/logout": {
             "get": {
                 "tags": [
-                    "AuthController"
+                    "Backend APIs (Auth Controller)"
                 ],
                 "summary": "Logout from SAAT CRM",
                 "description": "Logout",
                 "operationId": "1deead8175ec826e4eff4671de92fbf3",
                 "responses": {
                     "200": {
-                        "description": "User logged in successfully"
+                        "description": "User logged out successfully"
                     }
                 }
             }
@@ -58,8 +58,8 @@
     },
     "tags": [
         {
-            "name": "AuthController",
-            "description": "AuthController"
+            "name": "Backend APIs (Auth Controller)",
+            "description": "Backend APIs (Auth Controller)"
         }
     ]
 }
