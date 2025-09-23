@@ -1,6 +1,7 @@
 import api from "../api/axios";
 
 export const AuthController = {
+    // FUNCTION TO LOGIN
     async login(
         email: string,
         password: string,
@@ -17,11 +18,13 @@ export const AuthController = {
         return data;
     },
 
+    // FUNCTION TO FETCH USER INFORMATION
     async fetchUser() {
         const { data } = await api.get("/api/user");
         return data;
     },
 
+    // FUNCTION TO LOGOUT THE SYSTEM
     async logout() {
         await api.get("/api/logout");
         return true;

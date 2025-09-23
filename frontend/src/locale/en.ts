@@ -77,6 +77,17 @@ const en = {
     designationTitle: "Designations Managment",
     designationSubtitle:
         "Define and manage job designations to maintain role clarity and organizational structure.",
+    
+    // Permissions
+    permission: "Permission",
+    module: "Module",
+    description: "Description",
+    status: "Status",
+    actions: "Actions",
+
+    // Data Not Found Messages
+    notFound: "No data found",
+    noRecords: "There are no records to display"
 };
 
 export default en;

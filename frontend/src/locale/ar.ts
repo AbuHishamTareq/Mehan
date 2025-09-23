@@ -76,6 +76,17 @@ const ar = {
     designationTitle: "إدارة المسميات الوظيفية",
     designationSubtitle:
         "تحديد وإدارة المسميات الوظيفية للحفاظ على وضوح الأدوار والهيكل التنظيمي.",
+
+    // Permissions
+    permission: "الصلاحية",
+    module: "الوحدة البرمجية",
+    description: "الوصف",
+    status: "الحالة",
+    actions: "الإجراءات",
+
+    // Data Not Found Messages
+    notFound: "لا توجد بيانات",
+    noRecords: "لا توجد سجلات للعرض",
 };
 
 export default ar;

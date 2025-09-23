@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PermissionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,11 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     });
 
     // Dashboard APIs
+
+    // Settings/Permissions APIs
+    Route::prefix("permissions")->group(function () {
+        Route::get("/index", [PermissionController::class, "index"])->name("setting.permissions.index");
+    });
 
     // Logout APIs
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

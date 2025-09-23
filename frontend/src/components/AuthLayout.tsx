@@ -3,7 +3,7 @@ import { AppSidebar } from "../components/AppSidebar";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
-import { Bell, Settings, LogOut, Loader2 } from "lucide-react";
+import { Bell, LogOut, Loader2 } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -113,18 +113,6 @@ function AuthLayout() {
                                             </div>
                                         </DropdownMenuLabel>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem className="cursor-pointer">
-                                            <Settings className="w-4 h-4 me-2" />
-                                            <div
-                                                className={
-                                                    isRTL
-                                                        ? "font-arabic"
-                                                        : "font-english"
-                                                }
-                                            >
-                                                {t("settings")}
-                                            </div>
-                                        </DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
                                             onClick={handleLogout}
