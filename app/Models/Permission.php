@@ -10,11 +10,20 @@ class Permission extends SpatiePermission
     protected $table = "permissions";
 
     protected $fillable = [
-        "module",
+        "module_id",
         "name",
         "label",
         "description",
         "is_active",
         "guard_name"
     ];
+
+    protected $attributes = [
+        'guard_name' => 'sanctum',
+    ];
+
+    public function module()
+    {
+        return $this->belongsTo(Module::class, 'module_id');
+    }
 }

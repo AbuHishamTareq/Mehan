@@ -77,6 +77,8 @@ const en = {
     designationTitle: "Designations Managment",
     designationSubtitle:
         "Define and manage job designations to maintain role clarity and organizational structure.",
+    modulesTitle: "Modules Management",
+    modulesSubtitle: "Manage and configure system modules to enhance functionality and performance.",
     
     // Permissions
     permission: "Permission",
@@ -87,7 +89,20 @@ const en = {
 
     // Data Not Found Messages
     notFound: "No data found",
-    noRecords: "There are no records to display"
+    noRecords: "There are no records to display",
+
+    // Roles
+    role: "Role",
+
+    // Bulk Action
+    bulkErrorMessage: "You must select at least one Record.",
+    InactiveIdsErrorMessage: "All of the selected data is already active.",
+
+    // Departments
+    engName: "English Name",
+    arName: "Arabic Name",
+    deleted: "Deleted?",
+    departmentDeleteMessage: "Department Deleted Successfully !"
 };
 
 export default en;

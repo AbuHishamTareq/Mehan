@@ -1,4 +1,10 @@
 import * as LucidIcons from "lucide-react";
+import type {
+    Control,
+    FieldErrors,
+    FieldValues,
+    UseFormRegister,
+} from "react-hook-form";
 
 // Language Context Types
 export type Language = "en" | "ar";
@@ -38,7 +44,7 @@ interface TableColumn {
     isToggle?: boolean;
 }
 
-interface TableRow {
+export interface TableRow {
     [key: string]: string | number | boolean | null | undefined | unknown;
 }
 
@@ -52,18 +58,136 @@ interface TableAction {
 export interface TableActionButtonsProps {
     row: TableRow;
     actions: TableAction[];
+    isModel?: boolean;
+    onView?: (row: TableRow) => void;
+    onEdit?: (row: TableRow) => void;
+    onDelete?: (id: number) => void;
 }
 
 export interface CustomTableProps {
     columns: TableColumn[];
     actions: TableAction[];
     data: TableRow[];
+    isModel?: boolean;
+    onView?: (row: TableRow) => void;
+    onEdit?: (row: TableRow) => void;
+    onDelete?: (id: number) => void;
+    from: number;
+    enableSelection?: boolean;
+    selectedRows?: number[];
+    onSelectionChange?: (selectedIds: number[]) => void;
+    onStatusToggle?: (id: number, is_active: boolean) => void;
+}
+
+// CUSTOM FORM
+interface AddButtonProps {
+    id?: string;
+    key?: string;
+    label: string;
+    className?: string;
+    icon?: LucidIcons.LucideIcon;
+    type: "button" | "submit" | "reset" | undefined;
+    variant?:
+        | "default"
+        | "ghost"
+        | "outline"
+        | "link"
+        | "destructive"
+        | undefined;
+}
+
+interface ButtonProps {
+    key: string;
+    label: string;
+    className?: string;
+    type: "button" | "submit" | "reset" | undefined;
+    variant?:
+        | "default"
+        | "ghost"
+        | "outline"
+        | "link"
+        | "destructive"
+        | undefined;
+}
+
+export interface SelectOptions {
+    label: string;
+    value: string | number;
+    key: string | number;
+}
+
+interface FormFields {
+    id: string;
+    key: string;
+    name: string;
+    label: string;
+    type: "text" | "select" | "radio" | "textarea" | "checkbox" | undefined;
+    tabIndex?: number;
+    autofocus?: boolean;
+    placeholder?: string;
+    rows?: number;
+    className?: string;
+    options?: SelectOptions[];
+}
+
+interface ExtraData {
+    [module: string]: PermissionProps[];
+}
+
+export interface CustomModelFormProps<T extends FieldValues> {
+    title: string;
+    description: string;
+    addButton: AddButtonProps;
+    fields: FormFields[];
+    buttons: ButtonProps[];
+    register: UseFormRegister<T>;
+    errors: FieldErrors<T>;
+    control: Control<T>;
+    isSubmitting: boolean;
+    onSubmit: (e?: React.BaseSyntheticEvent) => void | Promise<void>;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    mode: "create" | "view" | "edit";
+    extraData?: ExtraData;
 }
 
 // PERMISSIONS INTERFACE
-export type PermissionProps = {
+export interface PermissionProps extends TableRow {
+    id?: number;
     label: string;
     module: string;
-    description: string;
-    is_active: boolean;
-};
+    description?: string;
+    is_active?: boolean;
+}
+
+// MODULE INTERFACE
+export interface ModuleProps extends TableRow {
+    id?: number;
+    label: string;
+}
+
+// PAGINATION LINKS INTERFACE
+export interface LinkProps {
+    url: string | null;
+    label: string;
+    active: boolean;
+    page: number | null;
+}
+
+//ROLES INTERFACE
+export interface RoleProps extends TableRow {
+    id?: number;
+    label: string;
+    description?: string;
+    is_active?: boolean;
+}
+
+// DEPARTMENT INTERFACE
+export interface DepartmentProps extends TableRow {
+    id?: number;
+    en_name: string;
+    ar_name: string;
+    is_active?: boolean;
+    is_deleted?: boolean;
+    deleted?: string;
+}

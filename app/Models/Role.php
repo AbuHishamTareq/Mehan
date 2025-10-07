@@ -16,4 +16,8 @@ class Role extends SpatieRole
         "is_active",
         "guard_name"
     ];
+
+    protected $attributes = [
+        'guard_name' => 'sanctum',
+    ];
 }

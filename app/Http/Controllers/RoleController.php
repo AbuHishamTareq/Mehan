@@ -2,76 +2,72 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Module;
 use App\Models\Permission;
+use App\Models\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-class PermissionController extends Controller
+class RoleController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Permission::query()->with("module");
+        $query = Role::query()->with("permissions");
 
         if ($search = $request->query("search")) {
-            $query->where(function ($q) use ($search) {
-                $q->where("label", "ilike", "%{$search}%")
-                    ->orWhere("description", "ilike", "%{$search}%")
-                    ->orWhereHas("module", function ($mq) use ($search) {
-                        $mq->where("label", "ilike", "%{$search}%");
-                    });
-            });
+            $query->where("label", "ilike", "%{$search}%")
+                ->orWhere("description", "ilike", "%{$search}%");
         }
 
         $perPage = $request->query("perPage", 10);
 
-        $permissions = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        $roles = $query->orderBy("created_at", "DESC")->paginate($perPage);
 
-        $permissions = $permissions->through(function ($permission) {
-            return [
-                "id" => $permission->id,
-                "label" => $permission->label,
-                "name" => $permission->name,
-                "module_id" => $permission->module_id,
-                "description" => $permission->description,
-                "is_active" => $permission->is_active,
-                "module" => $permission->module->label,
-            ];
-        });
-
-        $modules = Module::all()->map(function ($module) {
-            return [
-                "label"    => $module->label,
-                "value" => $module->id,
-                "key" => $module->id,
-            ];
+        $permissions = Permission::with("module")->get()->groupBy("module.label")->map(function ($permissions) {
+            return $permissions->map(function ($permission) {
+                return [
+                    "id"          => $permission->id,
+                    "label"       => $permission->label,
+                    "description" => $permission->description,
+                    "is_active"   => $permission->is_active,
+                    "module"      => $permission->module->label,
+                ];
+            })->values();
         });
 
         return response()->json([
-            "permissions" => $permissions,
-            "modules" => $modules
+            "roles" => $roles,
+            "permissions" => $permissions
         ]);
     }
 
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            "module" => "required|integer|exists:modules,id",
-            "label" => "required|string"
+            "permissions" => "required|array",
+            "permissions.*" => "integer|exists:permissions,id",
+            "label" => "required|string",
         ]);
 
-        Permission::create([
-            "module_id" => $request->input("module"),
+        $role = Role::create([
             "label" => $request->input("label"),
             "name" => Str::slug($request->input("label"), "_"),
             "description" => $request->input("description") ?? null,
             "is_active" => $request->input("is_active") ?? true,
         ]);
 
+        if (!$role) {
+            return response()->json([
+                "message" => "Unable to create role. Please try again !",
+                "status" => 500
+            ], 500);
+        }
+
+        $role->syncPermissions($request["permissions"]);
+
         return response()->json([
-            "message" => "Permission created successfully",
+            "message" => "Role created successfully",
             "status" => 201 // HTTP status code for Created
         ]);
     }
@@ -79,40 +75,42 @@ class PermissionController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         $request->validate([
-            "module" => "required|integer|exists:modules,id",
-            "label" => "required|string"
+            "permissions" => "required|array",
+            "permissions.*" => "integer|exists:permissions,id",
+            "label" => "required|string",
         ]);
 
-        $permission = Permission::find($id);
+        $role = Role::find($id);
 
-        if (!$permission) {
+        if ($role) {
+            $role->label = $request->input("label");
+            $role->description = $request->input("description");
+            $role->save();
+
+            $role->syncPermissions($request->input("permissions"));
+
             return response()->json([
-                "message" => "Permission not found",
-                "status" => 404
-            ], 404);
+                "message" => "Role updated successfully!",
+                "status" => 200
+            ], 200);
         }
 
-        $permission->module_id = $request->input("module");
-        $permission->label = $request->input("label");
-        $permission->description = $request->input("description") ?? null;
-        $permission->save();
-
         return response()->json([
-            "message" => "Permission updated successfully",
-            "status" => 200
-        ], 200);
+            "message" => "Unable to update role. Please try again!",
+            "status" => 500
+        ], 500);
     }
 
     public function bulkActivate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             "ids" => "required|array|min:1",
-            "ids.*" => "integer|exists:permissions,id"
+            "ids.*" => "integer|exists:roles,id"
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                "message" => "Invalid permissions IDs provided.",
+                "message" => "Invalid roles IDs provided.",
                 "details" => $validator->errors(),
                 "status" => 422
             ], 422);
@@ -120,7 +118,7 @@ class PermissionController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Permission::whereIn("id", $ids)->update([
+        $updated = Role::whereIn("id", $ids)->update([
             "is_active" => true
         ]);
 
@@ -133,7 +131,7 @@ class PermissionController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to deactivate permissions. Please try again later.",
+            "message" => "Failed to deactivate roles. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -143,12 +141,12 @@ class PermissionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "ids" => "required|array|min:1",
-            "ids.*" => "integer|exists:permissions,id"
+            "ids.*" => "integer|exists:roles,id"
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                "message" => "Invalid permissions IDs provided.",
+                "message" => "Invalid roles IDs provided.",
                 "details" => $validator->errors(),
                 "status" => 422
             ], 422);
@@ -156,7 +154,7 @@ class PermissionController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Permission::whereIn("id", $ids)->update([
+        $updated = Role::whereIn("id", $ids)->update([
             "is_active" => false
         ]);
 
@@ -169,7 +167,7 @@ class PermissionController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to activate permissions. Please try again later.",
+            "message" => "Failed to activate roles. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -180,7 +178,7 @@ class PermissionController extends Controller
         $id = $request->input("id");
         $is_active = $request->input("is_active");
 
-        $updated = Permission::where("id", $id)->update([
+        $updated = Role::where("id", $id)->update([
             "is_active" => $is_active
         ]);
 
@@ -193,7 +191,7 @@ class PermissionController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to activate permissions. Please try again later.",
+            "message" => "Failed to activate roles. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);

@@ -68,7 +68,7 @@ class User extends Authenticatable
     }
 
     // Relations //
-    
+
     // Department of the user
     public function department()
     {
@@ -93,6 +93,12 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, "updated_by");
     }
 
+    // Destroyer relation
+    public function destroyer()
+    {
+        return $this->belongsTo(User::class, "deleted_by");
+    }
+
     // Optional: users created by this user
     public function createdUsers()
     {
@@ -103,6 +109,12 @@ class User extends Authenticatable
     public function updatedUsers()
     {
         return $this->hasMany(User::class, "updated_by");
+    }
+
+    // Optional: users deleted by this user
+    public function deletedUsers()
+    {
+        return $this->hasMany(User::class, "deleted_by");
     }
 
     // Optional: scopes for active/inactive users

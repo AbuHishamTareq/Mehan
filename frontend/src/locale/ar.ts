@@ -76,6 +76,9 @@ const ar = {
     designationTitle: "إدارة المسميات الوظيفية",
     designationSubtitle:
         "تحديد وإدارة المسميات الوظيفية للحفاظ على وضوح الأدوار والهيكل التنظيمي.",
+    modulesTitle: "إدارة الوحدات البرمجية",
+    modulesSubtitle:
+        "إدارة وتكوين الوحدات البرمجية للنظام لتعزيز الوظائف والأداء.",
 
     // Permissions
     permission: "الصلاحية",
@@ -87,6 +90,19 @@ const ar = {
     // Data Not Found Messages
     notFound: "لا توجد بيانات",
     noRecords: "لا توجد سجلات للعرض",
+
+    // Roles
+    role: "الدور",
+
+    // Bulk Action
+    bulkErrorMessage: "يجب عليك اختيار سجل واحد على الاقل.",
+    InactiveIdsErrorMessage: "جميع البيانات المحددة نشطة بالفعل.",
+
+    // Departments
+    engName: "الاسم بالانجليزية",
+    arName: "الاسم بالعربية",
+    deleted: "تم حذفه؟",
+    departmentDeleteMessage: "تم حذف القسم بنجاح !",
 };
 
 export default ar;

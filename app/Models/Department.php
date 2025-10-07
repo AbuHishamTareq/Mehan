@@ -47,4 +47,10 @@ class Department extends Model
     {
         return $this->belongsTo(User::class, "updated_by");
     }
+
+    // Users who updated this department
+    public function destroyer()
+    {
+        return $this->belongsTo(User::class, "deleted_by");
+    }
 }

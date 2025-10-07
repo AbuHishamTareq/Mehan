@@ -2,103 +2,87 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Module;
-use App\Models\Permission;
+use App\Models\Department;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
-class PermissionController extends Controller
+class DepartmentController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Permission::query()->with("module");
+        $query = Department::query();
 
-        if ($search = $request->query("search")) {
-            $query->where(function ($q) use ($search) {
-                $q->where("label", "ilike", "%{$search}%")
-                    ->orWhere("description", "ilike", "%{$search}%")
-                    ->orWhereHas("module", function ($mq) use ($search) {
-                        $mq->where("label", "ilike", "%{$search}%");
-                    });
-            });
+        if ($search = $request->query('search')) {
+            $query->where("en_name", "ilike", "%{$search}%")
+                ->orWhere("ar_name", "ilike", "%{$search}%");
         }
 
-        $perPage = $request->query("perPage", 10);
+        $perPage = $request->query('perPage', 10);
 
-        $permissions = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        $departments = $query->orderBy("created_at", "DESC")->paginate($perPage);
 
-        $permissions = $permissions->through(function ($permission) {
+        $departments = $departments->through(function ($department) {
             return [
-                "id" => $permission->id,
-                "label" => $permission->label,
-                "name" => $permission->name,
-                "module_id" => $permission->module_id,
-                "description" => $permission->description,
-                "is_active" => $permission->is_active,
-                "module" => $permission->module->label,
-            ];
-        });
-
-        $modules = Module::all()->map(function ($module) {
-            return [
-                "label"    => $module->label,
-                "value" => $module->id,
-                "key" => $module->id,
+                "id" => $department->id,
+                "en_name" => $department->en_name,
+                "ar_name" => $department->ar_name,
+                "is_active" => $department->is_active,
+                "is_deleted" => $department->is_deleted,
+                "deleted" => $department->is_deleted === true ? "Yes" : "No",
             ];
         });
 
         return response()->json([
-            "permissions" => $permissions,
-            "modules" => $modules
+            "departments" => $departments
         ]);
     }
 
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            "module" => "required|integer|exists:modules,id",
-            "label" => "required|string"
+            "en_name" => "required|string",
+            "ar_name" => "required|string"
         ]);
 
-        Permission::create([
-            "module_id" => $request->input("module"),
-            "label" => $request->input("label"),
-            "name" => Str::slug($request->input("label"), "_"),
-            "description" => $request->input("description") ?? null,
+        Department::create([
+            "en_name" => $request->input("en_name"),
+            "ar_name" => $request->input("ar_name"),
             "is_active" => $request->input("is_active") ?? true,
+            "is_deleted" => $request->input("is_deleted") ?? false,
+            "created_by" => Auth::id()
         ]);
 
         return response()->json([
-            "message" => "Permission created successfully",
+            "message" => "Department created successfully",
             "status" => 201 // HTTP status code for Created
-        ]);
+        ], 201);
     }
 
     public function update(Request $request, $id): JsonResponse
     {
         $request->validate([
-            "module" => "required|integer|exists:modules,id",
-            "label" => "required|string"
+            "en_name" => "required|string",
+            "ar_name" => "required|string"
         ]);
 
-        $permission = Permission::find($id);
+        $department = Department::find($id);
 
-        if (!$permission) {
+        if (!$department) {
             return response()->json([
-                "message" => "Permission not found",
+                "message" => "Department not found",
                 "status" => 404
             ], 404);
         }
 
-        $permission->module_id = $request->input("module");
-        $permission->label = $request->input("label");
-        $permission->description = $request->input("description") ?? null;
-        $permission->save();
+        $department->en_name = $request->input("en_name");
+        $department->ar_name = $request->input("ar_name");
+        $department->updated_by = Auth::id();
+        $department->save();
 
         return response()->json([
-            "message" => "Permission updated successfully",
+            "message" => "Department updated successfully",
             "status" => 200
         ], 200);
     }
@@ -107,12 +91,12 @@ class PermissionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "ids" => "required|array|min:1",
-            "ids.*" => "integer|exists:permissions,id"
+            "ids.*" => "integer|exists:departments,id"
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                "message" => "Invalid permissions IDs provided.",
+                "message" => "Invalid department IDs provided.",
                 "details" => $validator->errors(),
                 "status" => 422
             ], 422);
@@ -120,7 +104,7 @@ class PermissionController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Permission::whereIn("id", $ids)->update([
+        $updated = Department::whereIn("id", $ids)->update([
             "is_active" => true
         ]);
 
@@ -133,7 +117,7 @@ class PermissionController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to deactivate permissions. Please try again later.",
+            "message" => "Failed to deactivate departments. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -143,12 +127,12 @@ class PermissionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "ids" => "required|array|min:1",
-            "ids.*" => "integer|exists:permissions,id"
+            "ids.*" => "integer|exists:departments,id"
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                "message" => "Invalid permissions IDs provided.",
+                "message" => "Invalid department IDs provided.",
                 "details" => $validator->errors(),
                 "status" => 422
             ], 422);
@@ -156,7 +140,7 @@ class PermissionController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Permission::whereIn("id", $ids)->update([
+        $updated = Department::whereIn("id", $ids)->update([
             "is_active" => false
         ]);
 
@@ -169,7 +153,7 @@ class PermissionController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to activate permissions. Please try again later.",
+            "message" => "Failed to activate departments. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -180,7 +164,7 @@ class PermissionController extends Controller
         $id = $request->input("id");
         $is_active = $request->input("is_active");
 
-        $updated = Permission::where("id", $id)->update([
+        $updated = Department::where("id", $id)->update([
             "is_active" => $is_active
         ]);
 
@@ -193,9 +177,32 @@ class PermissionController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to activate permissions. Please try again later.",
+            "message" => "Failed to activate departments. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
+    }
+
+    public function destroy($id): JsonResponse
+    {
+        $department = Department::find($id);
+
+        if (!$department) {
+            return response()->json([
+                "message" => "Department not found !",
+                "status" => 404
+            ], 404);
+        }
+
+        $updated = Department::where("id", $id)->update([
+            "is_active" => false,
+            "is_deleted" => true,
+            "deleted_by" => Auth::id()
+        ]);
+
+        return response()->json([
+            "message" => "Department deleted Successfully !",
+            "status" => 200
+        ], 200);
     }
 }

@@ -15,6 +15,8 @@ import {
     Settings2,
     Building2,
     IdCardLanyard,
+    Code2,
+    ShieldUser,
 } from "lucide-react";
 import {
     Sidebar,
@@ -68,6 +70,12 @@ export function AppSidebar() {
                     icon: Settings2,
                 },
                 {
+                    id: "modules",
+                    title: t("modulesTitle"),
+                    url: "/settings/modules",
+                    icon: Code2,
+                },
+                {
                     id: "department",
                     title: t("departmentTitle"),
                     url: "/settings/department",
@@ -83,7 +91,7 @@ export function AppSidebar() {
                     id: "permissionsAndRoles",
                     title: t("permissionsAndRolesTitle"),
                     url: "/settings/permissions_roles",
-                    icon: LockKeyholeOpen,
+                    icon: ShieldUser,
                 },
                 {
                     id: "users",
@@ -127,10 +135,18 @@ export function AppSidebar() {
         >
             <SidebarContent>
                 {/* Logo Section */}
-                <div className="p-4 border-b border-sidebar-border">
+                <div
+                    className={`py-4 border-sidebar-border ${
+                        state === "collapsed" ? "px-0" : "px-4"
+                    }`}
+                >
                     <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                        <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                            <Users className="w-4 h-4 text-white" />
+                        <div
+                            className={`w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                state === "collapsed" ? "mx-auto" : ""
+                            }`}
+                        >
+                            <Users className="w-5 h-5 text-white" />
                         </div>
                         {state !== "collapsed" && (
                             <div
@@ -173,9 +189,13 @@ export function AppSidebar() {
                                                         isRTL
                                                             ? "font-arabic"
                                                             : "font-english"
+                                                    } ${
+                                                        state === "collapsed"
+                                                            ? "w-full justify-center"
+                                                            : ""
                                                     }`}
                                                 >
-                                                    <item.icon className="h-4 w-4" />
+                                                    <item.icon className="h-5 w-5" />
                                                     {state !== "collapsed" && (
                                                         <span>
                                                             {item.title}
@@ -186,9 +206,9 @@ export function AppSidebar() {
                                                     state !== "collapsed" && (
                                                         <span>
                                                             {isExpanded ? (
-                                                                <Minus className="w-4 h-4" />
+                                                                <Minus className="w-5 h-5" />
                                                             ) : (
-                                                                <Plus className="w-4 h-4" />
+                                                                <Plus className="w-5 h-5" />
                                                             )}
                                                         </span>
                                                     )}
@@ -210,7 +230,7 @@ export function AppSidebar() {
                                                                 end
                                                                 className="flex items-center gap-2 px-2 py-1 rounded-md text-sm hover:bg-accent/10 transition-colors"
                                                             >
-                                                                <child.icon className="h-4 w-4" />
+                                                                <child.icon className="h-5 w-5" />
                                                                 <span>
                                                                     {
                                                                         child.title

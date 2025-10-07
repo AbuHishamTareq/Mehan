@@ -1,28 +1,28 @@
 import * as LucidIcons from "lucide-react";
 // CREATE PERMISSION TABLE CONFIGURATIONS LIKE HEADERS, AND BODY
-export const PermissionTableConfig = {
+export const DepartmentTableConfig = {
     // DEFINE TABLE COLUMNS
     columns: [
         // KEYS MUST BE THE SAME NAME OF COLUMN IN POSTGRESQL DATABASE
         {
-            label: "permission",
-            key: "label",
+            label: "engName",
+            key: "en_name",
             className: "border p-4 text-center",
         },
         {
-            label: "module",
-            key: "module",
-            className: "capitalize border p-4 text-center",
-        },
-        {
-            label: "description",
-            key: "description",
-            className: "w-90 border p-4 text-center",
+            label: "arName",
+            key: "ar_name",
+            className: "border p-4 text-center",
         },
         {
             label: "status",
             key: "is_active",
             isToggle: true,
+            className: "border p-4 text-center",
+        },
+        {
+            label: "deleted",
+            key: "deleted",
             className: "border p-4 text-center",
         },
         {
@@ -46,6 +46,13 @@ export const PermissionTableConfig = {
             route: "",
             className:
                 "w-8 h-8 flex items-center justify-center rounded-lg bg-amber-500 hover:bg-amber-600 text-white",
+        },
+        {
+            label: "Delete",
+            icon: "Trash2" as keyof typeof LucidIcons,
+            route: "",
+            className:
+                "w-8 h-8 flex items-center justify-center rounded-lg bg-red-500 hover:bg-red-600 text-white",
         },
     ],
 };

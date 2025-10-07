@@ -1,9 +1,9 @@
-import type { PermissionProps } from "../../types/types";
+import type { RoleProps } from "../../types/types";
 import api from "../api/axios";
 
-export const PermissionController = {
-    // FUNCTION TO FETCH PERMISSIONS FROM DATABASE
-    async fetchPermissions(params?: {
+export const RoleController = {
+    // FUNCTION TO FETCH ROLES FROM DATABASE
+    async fetchRoles(params?: {
         search?: string;
         perPage?: number;
         page?: number;
@@ -14,7 +14,7 @@ export const PermissionController = {
         if (params?.page) query.append("page", params.page.toString());
 
         const url =
-            "/api/permissions/index" +
+            "/api/roles/index" +
             (query.toString() ? "?" + query.toString() : "");
 
         const { data } = await api.get(url);
@@ -22,41 +22,32 @@ export const PermissionController = {
     },
 
     // FUNCTION TO ADD NEW PERMISSION TO DATABASE
-    async addPermmission(permissionData: PermissionProps) {
-        const { data } = await api.post(
-            "/api/permissions/store",
-            permissionData
-        );
+    async addRole(roleData: RoleProps) {
+        const { data } = await api.post("/api/roles/store", roleData);
         return data;
     },
 
-    async updatePermission(
-        permissionId: number,
-        permissionData: PermissionProps
-    ) {
-        const { data } = await api.put(
-            "/api/permissions/update/" + permissionId,
-            permissionData
-        );
+    async updateRole(roleId: number, RoleData: RoleProps) {
+        const { data } = await api.put("/api/roles/update/" + roleId, RoleData);
         return data;
     },
 
     async bulkActivate(ids: number[]) {
-        const { data } = await api.put("/api/permissions/bulkActivate", {
+        const { data } = await api.put("/api/roles/bulkActivate", {
             ids,
         });
         return data;
     },
 
     async bulkDeactivate(ids: number[]) {
-        const { data } = await api.put("/api/permissions/bulkDeactivate", {
+        const { data } = await api.put("/api/roles/bulkDeactivate", {
             ids,
         });
         return data;
     },
 
     async activeDeactivate(id: number, checked: boolean) {
-        const { data } = await api.put("/api/permissions/activeDeactivate", {
+        const { data } = await api.put("/api/roles/activeDeactivate", {
             id,
             is_active: checked ? true : false
         });

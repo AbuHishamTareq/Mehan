@@ -1,78 +1,63 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-
 import { CustomTable } from "../../components/custom-table";
 import { useLanguage } from "../../hooks/useLanguage";
+import { ModuleTableConfig } from "../../config/tables/module-table";
 import { useCallback, useEffect, useState, useRef } from "react";
 import { CustomModelForm } from "../../components/custom-model-form";
+import { ModuleModelFormConfig } from "../../config/forms/module-model-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { useToast } from "../../hooks/use-toast";
-import {
-    type PermissionProps,
-    type LinkProps,
-    type RoleProps,
-} from "../../../types/types";
+import type { LinkProps, ModuleProps } from "../../../types/types";
 import { Pagination } from "../../components/ui/pagination";
+import { ModuleController } from "../../controllers/ModuleController";
 import { Input } from "../../components/ui/input";
-import { RoleController } from "../../controllers/RoleController";
-import { RoleTableConfig } from "../../config/tables/role-table";
-import { RoleModelFormConfig } from "../../config/forms/role-model-form";
-import { BulkAction } from "../../components/bulk-action";
 import { Search } from "lucide-react";
 
-interface RoleFormValue {
+interface ModuleFormValue {
     label: string;
-    description?: string;
-    permissions: number[];
     search?: string;
     perPage?: number;
 }
 
-interface RolePaginationProps {
-    data: RoleProps[];
+interface ModulePaginationProps {
+    data: ModuleProps[];
     links: LinkProps[];
     from: number;
     to: number;
     total: number;
 }
 
-interface RoleIndexProps {
-    roles: RolePaginationProps;
+interface ModuleIndexProps {
+    modules: ModulePaginationProps;
 }
 
 const schema = yup.object({
-    label: yup.string().required("Role is required"),
-    permissions: yup
-        .array()
-        .of(yup.number().required())
-        .min(1, "Select at least one permission")
-        .required("Permissions are required"),
+    label: yup.string().required("Module is required"),
 });
 
-const PermissionsAndRoles = () => {
+const Modules = () => {
     const { t, isRTL } = useLanguage();
     const font = isRTL ? "font-arabic" : "font-english";
     const { toast } = useToast();
 
     const [modelOpen, setModelOpen] = useState(false);
-    const [roles, setRoles] = useState<RoleIndexProps>({
-        roles: { data: [], links: [], from: 0, to: 0, total: 0 },
+    const [modules, setModules] = useState<ModuleIndexProps>({
+        modules: { data: [], links: [], from: 0, to: 0, total: 0 },
     });
     const [pageLoading, setPageLoading] = useState(true);
     const [formSubmitting, setFormSubmitting] = useState(false);
     const [mode, setMode] = useState<"create" | "view" | "edit">("create");
-    const [selectedRole, setSelectedRole] = useState<RoleProps | null>(null);
-    const [permissions, setPermissions] = useState<PermissionProps[]>([]);
-    const [selectedRows, setSelectedRows] = useState<number[]>([]);
+    const [selectedModule, setSelectedModule] = useState<ModuleProps | null>(
+        null
+    );
 
     // Persist current perPage in state
     const [currentPerPage, setCurrentPerPage] = useState(10);
 
-    const defaultFormValues: RoleFormValue = {
+    const defaultFormValues: ModuleFormValue = {
         label: "",
-        description: "",
-        permissions: [],
         search: "",
         perPage: currentPerPage,
     };
@@ -85,7 +70,7 @@ const PermissionsAndRoles = () => {
         control,
         watch,
         setValue,
-    } = useForm<RoleFormValue>({
+    } = useForm<ModuleFormValue>({
         resolver: yupResolver(schema),
         mode: "onSubmit",
         defaultValues: defaultFormValues,
@@ -95,7 +80,7 @@ const PermissionsAndRoles = () => {
 
     const initialMount = useRef(true);
 
-    const fetchRoleData = useCallback(
+    const fetchModuleData = useCallback(
         async (
             search?: string,
             perPage: number = currentPerPage,
@@ -106,13 +91,12 @@ const PermissionsAndRoles = () => {
                 if (triggerPageLoading) {
                     setPageLoading(true);
                 }
-                const response = await RoleController.fetchRoles({
+                const response = await ModuleController.fetchModules({
                     search,
                     perPage,
                     page,
                 });
-                setRoles(response);
-                setPermissions(response.permissions);
+                setModules(response);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -126,7 +110,7 @@ const PermissionsAndRoles = () => {
 
     // Initial fetch
     useEffect(() => {
-        fetchRoleData(searchValue, currentPerPage, undefined, true);
+        fetchModuleData(searchValue, currentPerPage, undefined, true);
         initialMount.current = false;
     }, []);
 
@@ -135,46 +119,39 @@ const PermissionsAndRoles = () => {
         if (initialMount.current) return;
 
         const timer = setTimeout(
-            () => fetchRoleData(searchValue, currentPerPage),
+            () => fetchModuleData(searchValue, currentPerPage),
             300
         );
         return () => clearTimeout(timer);
-    }, [searchValue, currentPerPage, fetchRoleData]);
+    }, [searchValue, currentPerPage, fetchModuleData]);
 
-    const columns = RoleTableConfig.columns.map((col) => ({
+    const columns = ModuleTableConfig.columns.map((col) => ({
         ...col,
         label: t(col.label),
         className: `${col.className} ${font}`,
     }));
 
-    const onSubmit = async (data: RoleFormValue) => {
+    const onSubmit = async (data: ModuleFormValue) => {
         setFormSubmitting(true);
         try {
-            const payload: RoleProps = {
-                label: data.label,
-                description: data.description,
-                permissions: data.permissions,
-            };
-
-            if (mode === "edit" && selectedRole) {
-                const response = await RoleController.updateRole(
-                    selectedRole.id!,
-                    payload
+            if (mode === "edit" && selectedModule) {
+                const response = await ModuleController.updateModule(
+                    selectedModule.id!,
+                    data as ModuleProps
                 );
                 toast({
                     title: "Notification",
-                    description:
-                        response.message || "Role updated successfully !",
+                    description: response.message || "Module updated",
                     variant: "success",
                     className: font,
                 });
             } else {
-                console.log(payload);
-                const response = await RoleController.addRole(payload);
+                const response = await ModuleController.addModule(
+                    data as ModuleProps
+                );
                 toast({
                     title: "Notification",
-                    description:
-                        response.message || "Role added successfully !",
+                    description: response.message || "Module added",
                     variant: "success",
                     className: font,
                 });
@@ -182,7 +159,7 @@ const PermissionsAndRoles = () => {
             reset(defaultFormValues);
             closeModel();
             // Always fetch with current perPage
-            fetchRoleData(searchValue, currentPerPage);
+            fetchModuleData(searchValue, currentPerPage);
         } catch (error) {
             console.error(error);
         } finally {
@@ -192,7 +169,7 @@ const PermissionsAndRoles = () => {
 
     const closeModel = () => {
         setMode("create");
-        setSelectedRole(null);
+        setSelectedModule(null);
         reset(defaultFormValues);
         setModelOpen(false);
     };
@@ -202,22 +179,15 @@ const PermissionsAndRoles = () => {
         if (!open) closeModel();
     };
 
-    const openModel = (mode: "create" | "view" | "edit", role?: RoleProps) => {
+    const openModel = (
+        mode: "create" | "view" | "edit",
+        module?: ModuleProps
+    ) => {
         setMode(mode);
-
-        if (role) {
-            // Flatten role.permissions to IDs for the form
-            const formData = {
-                ...role,
-                permissions: Array.isArray(role.permissions)
-                    ? role.permissions.map((p: PermissionProps) => p.id)
-                    : [],
-            };
-
-            reset(formData);
-            setSelectedRole(role);
+        if (module) {
+            reset({ ...module });
+            setSelectedModule(module);
         }
-
         setModelOpen(true);
     };
 
@@ -225,59 +195,27 @@ const PermissionsAndRoles = () => {
         const perPage = Number(value);
         setCurrentPerPage(perPage); // persist selected perPage
         setValue("perPage", perPage);
-        fetchRoleData(searchValue, perPage); // immediately fetch
-    };
-
-    const handleSelectionChange = (selectedIds: number[]) => {
-        setSelectedRows(selectedIds);
-    };
-
-    const handleToggle = async (id: number, checked: boolean) => {
-        try {
-            await RoleController.activeDeactivate(id, checked);
-            fetchRoleData(searchValue, currentPerPage);
-        } catch (error) {
-            console.error("Something went wrong: ", error);
-        }
+        fetchModuleData(searchValue, perPage); // immediately fetch
     };
 
     return (
         <div className="bg-gradient-card min-h-full">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
-                <div className="mb-2 animate-fade-in border-b">
+                <div className="mb-8 animate-fade-in">
                     <h1 className={`text-3xl font-bold text-gray-900 ${font}`}>
-                        {t("permissionsAndRolesTitle")}
+                        {t("modulesTitle")}
                     </h1>
-                    <p className={`text-gray-600 mt-2 mb-4 ${font}`}>
-                        {t("permissionsAndRolesSubtitle")}
+                    <p className={`text-gray-600 mt-2 ${font}`}>
+                        {t("modulesSubtitle")}
                     </p>
                 </div>
 
-                {/* Bulk Actions */}
-                <div className="mt-4 mb-4 border-b">
-                    <BulkAction
-                        selectedRows={selectedRows}
-                        onClearSelection={() => setSelectedRows([])}
-                        data={roles.roles.data}
-                        bulkActivateFn={(ids) =>
-                            RoleController.bulkActivate(ids)
-                        }
-                        bulkDeactivateFn={(ids) =>
-                            RoleController.bulkDeactivate(ids)
-                        }
-                        onSuccess={() =>
-                            fetchRoleData(searchValue, currentPerPage)
-                        }
-                        title="role"
-                    />
-                </div>
-
-                {/* Search & Add Role */}
+                {/* Search & Add Module */}
                 <div className="flex items-center justify-between mb-2">
                     <div className="relative w-1/2">
                         <Input
-                            placeholder="Search Roles..."
+                            placeholder="Search Modules..."
                             className="h-10 w-full pr-10 border border-blue-200"
                             {...register("search")}
                         />
@@ -286,15 +224,15 @@ const PermissionsAndRoles = () => {
                     <CustomModelForm
                         title={
                             mode === "view"
-                                ? "View Role"
+                                ? "View Module"
                                 : mode === "edit"
-                                ? "Edit Role"
-                                : RoleModelFormConfig.title
+                                ? "Edit Module"
+                                : ModuleModelFormConfig.title
                         }
-                        description={RoleModelFormConfig.description}
-                        addButton={RoleModelFormConfig.addButton}
-                        fields={RoleModelFormConfig.fields}
-                        buttons={RoleModelFormConfig.buttons}
+                        description={ModuleModelFormConfig.description}
+                        addButton={ModuleModelFormConfig.addButton}
+                        fields={ModuleModelFormConfig.fields}
+                        buttons={ModuleModelFormConfig.buttons}
                         register={register}
                         errors={errors}
                         isSubmitting={formSubmitting}
@@ -303,35 +241,34 @@ const PermissionsAndRoles = () => {
                         open={modelOpen}
                         onOpenChange={handleModelToggle}
                         mode={mode}
-                        extraData={{ permissions }}
                     />
                 </div>
 
                 {/* Table */}
                 <CustomTable
                     columns={columns}
-                    actions={RoleTableConfig.actions}
-                    data={roles.roles.data}
+                    actions={ModuleTableConfig.actions}
+                    data={modules.modules.data}
                     isLoading={pageLoading}
-                    onView={(row) => openModel("view", row as RoleProps)}
-                    onEdit={(row) => openModel("edit", row as RoleProps)}
+                    onView={(row) => openModel("view", row as ModuleProps)}
+                    onEdit={(row) => openModel("edit", row as ModuleProps)}
                     isModel={true}
-                    from={roles.roles.from}
-                    enableSelection={true}
-                    selectedRows={selectedRows}
-                    onSelectionChange={handleSelectionChange}
-                    onStatusToggle={(id, checked) => handleToggle(id, checked)}
+                    from={modules.modules.from}
                 />
 
                 {/* Pagination */}
                 <div className="px-6 pb-4 border border-blue-200 bg-blue-50 rounded-b">
-                    {roles.roles && (
+                    {modules.modules && (
                         <Pagination
-                            paginateData={roles.roles}
+                            paginateData={modules.modules}
                             perPage={currentPerPage}
                             onPerPageChange={handlePerPageChange}
                             onPageChange={(page) =>
-                                fetchRoleData(searchValue, currentPerPage, page)
+                                fetchModuleData(
+                                    searchValue,
+                                    currentPerPage,
+                                    page
+                                )
                             }
                         />
                     )}
@@ -341,4 +278,4 @@ const PermissionsAndRoles = () => {
     );
 };
 
-export default PermissionsAndRoles;
+export default Modules;

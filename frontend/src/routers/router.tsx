@@ -9,6 +9,7 @@ import PermissionsAndRoles from "../views/settings/PermissionsAndRoles";
 import Permissions from "../views/settings/Permissions";
 import Departments from "../views/settings/Departments";
 import Designations from "../views/settings/Designations";
+import Modules from "../views/settings/Modules";
 
 const router = createBrowserRouter([
     {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
             {
                 path: "/settings/permissions",
                 element: <Permissions />,
+            },
+            {
+                path: "/settings/modules",
+                element: <Modules />,
             },
         ],
     },
