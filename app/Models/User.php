@@ -31,7 +31,6 @@ class User extends Authenticatable
         "desgnation_id",
         "created_by",
         "updated_by",
-        "is_deleted",
     ];
 
     /**
@@ -96,46 +95,12 @@ class User extends Authenticatable
     // Destroyer relation
     public function destroyer()
     {
-        return $this->belongsTo(User::class, "deleted_by");
+        return $this->belongsTo(User::class, "removed_by");
     }
 
-    // Optional: users created by this user
-    public function createdUsers()
+    // Destroyer relation
+    public function restorer()
     {
-        return $this->hasMany(User::class, "created_by");
-    }
-
-    // Optional: users updated by this user
-    public function updatedUsers()
-    {
-        return $this->hasMany(User::class, "updated_by");
-    }
-
-    // Optional: users deleted by this user
-    public function deletedUsers()
-    {
-        return $this->hasMany(User::class, "deleted_by");
-    }
-
-    // Optional: scopes for active/inactive users
-    public function scopeActive($query)
-    {
-        return $query->where("status", "active");
-    }
-
-    public function scopeInactive($query)
-    {
-        return $query->where("status", "inactive");
-    }
-
-    // Optional: scopes for user is deleted yes/no
-    public function scopeIsDeletedYes($query)
-    {
-        return $query->where("is_deleted", "Yes");
-    }
-
-    public function scopeIsDeletedNo($query)
-    {
-        return $query->where("is_deleted", "no");
+        return $this->belongsTo(User::class, "restored_by");
     }
 }

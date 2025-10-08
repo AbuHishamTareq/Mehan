@@ -97,12 +97,14 @@ const ar = {
     // Bulk Action
     bulkErrorMessage: "يجب عليك اختيار سجل واحد على الاقل.",
     InactiveIdsErrorMessage: "جميع البيانات المحددة نشطة بالفعل.",
+    ActiveIdsErrorMessage: "جميع البيانات المحددة غير نشطة بالفعل.",
 
     // Departments
     engName: "الاسم بالانجليزية",
     arName: "الاسم بالعربية",
-    deleted: "تم حذفه؟",
+    removed: "تم حذفه؟",
     departmentDeleteMessage: "تم حذف القسم بنجاح !",
+    departmentRestoreMessage: "تم استرجاع القسم بنجاح !",
 };
 
 export default ar;

@@ -12,6 +12,7 @@ export const CustomTable = ({
     onView,
     onEdit,
     onDelete,
+    onRestore,
     isModel,
     from = 0,
     isLoading = false,
@@ -137,6 +138,7 @@ export const CustomTable = ({
                                         {col.isToggle ? (
                                             <Switch
                                                 checked={!!row.is_active}
+                                                disabled={!!row.removed_at}
                                                 onCheckedChange={(checked) =>
                                                     onStatusToggle?.(
                                                         Number(row.id),
@@ -158,6 +160,7 @@ export const CustomTable = ({
                                                     onView={onView}
                                                     onEdit={onEdit}
                                                     onDelete={onDelete}
+                                                    onRestore={onRestore}
                                                 />
                                             </div>
                                         ) : (

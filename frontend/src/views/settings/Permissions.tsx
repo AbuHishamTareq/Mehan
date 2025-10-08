@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-
 import { CustomTable } from "../../components/custom-table";
 import { useLanguage } from "../../hooks/useLanguage";
 import { useCallback, useEffect, useState, useRef } from "react";
@@ -20,6 +18,7 @@ import { PermissionController } from "../../controllers/PermissionController";
 import { PermissionTableConfig } from "../../config/tables/permission-table";
 import { BulkAction } from "../../components/bulk-action";
 import { Search } from "lucide-react";
+import { generateAndDownloadFile } from "../../lib/generateAndDownloadFile";
 
 interface PermissionFormValue {
     module: string;
@@ -66,6 +65,9 @@ const Permissions = () => {
 
     // Persist current perPage
     const [currentPerPage, setCurrentPerPage] = useState(10);
+
+    type ExportType = "csv" | "excel" | "pdf";
+    type ExportScope = "all" | "current" | "selected";
 
     const defaultFormValues: PermissionFormValue = {
         module: "",
@@ -235,6 +237,91 @@ const Permissions = () => {
         }
     };
 
+    // EXPORT TO CSV, EXCEL AND PDF
+    const exportData = (type: ExportType, scope: ExportScope) => {
+        const font = isRTL ? "font-arabic" : "font-english";
+        const data = permissions.permissions.data;
+
+        let dataToExport = data;
+        let fileName = "permissions";
+
+        if (scope === "current") {
+            dataToExport = data; // if you want pagination, replace with current page slice
+            fileName = `permissions_page_${permissions.permissions.from}`;
+        } else if (scope === "selected") {
+            if (selectedRows.length === 0) {
+                toast({
+                    title: "Notification",
+                    description: "No rows selected to export.",
+                    variant: "destructive",
+                    className: font,
+                });
+                return;
+            }
+            dataToExport = data.filter((d) =>
+                selectedRows.includes(d.id!)
+            );
+            fileName = `permissions_selected_${selectedRows.length}`;
+        }
+
+        generateAndDownloadFile({
+            data: dataToExport,
+            columns: PermissionTableConfig.columns,
+            fileName,
+            toast,
+            t,
+            type,
+        });
+    };
+
+    // EXPORT CSV
+    // EXPORT ALL PAGES TO CSV
+    const handleExportAllCSV = async () => {
+        exportData("csv", "all");
+    };
+
+    // EXPORT CURRENT PAGE TO CSV
+    const handleCurrentPageExportCSV = () => {
+        exportData("csv", "current");
+    };
+
+    // EXPORT SELECTED ROWS TO CSV
+    const handleExportSelectedCSV = () => {
+        exportData("csv", "selected");
+    };
+
+    // EXPORT EXCEL
+    // EXPORT ALL PAGES TO EXCEL
+    const handleExportAllExcel = async () => {
+        exportData("excel", "all");
+    };
+
+    // EXPORT CURRENT PAGE TO EXCEL
+    const handleCurrentPageExportExcel = () => {
+        exportData("excel", "current");
+    };
+
+    // EXPORT SELECTED ROWS TO EXCEL
+    const handleExportSelectedExcel = () => {
+        exportData("excel", "selected");
+    };
+
+    // EXPORT PDF
+    // EXPORT ALL PAGES TO PDF
+    const handleExportAllPdf = async () => {
+        exportData("pdf", "all");
+    };
+
+    // EXPORT CURRENT PAGE TO PDF
+    const handleCurrentPageExportPdf = () => {
+        exportData("pdf", "current");
+    };
+
+    // EXPORT SELECTED ROWS TO PDF
+    const handleExportSelectedPdf = () => {
+        exportData("pdf", "selected");
+    };
+
     return (
         <div className="bg-gradient-card min-h-full">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -264,6 +351,16 @@ const Permissions = () => {
                             fetchPermissionData(searchValue, currentPerPage)
                         }
                         title="permision"
+                        exportAllCsvFn={handleExportAllCSV}
+                        exportCurrentPageCsv={handleCurrentPageExportCSV}
+                        exportSelectedRowsCsv={handleExportSelectedCSV}
+                        exportAllExcelFn={handleExportAllExcel}
+                        exportCurrentPageExcel={handleCurrentPageExportExcel}
+                        exportSelectedRowsExcel={handleExportSelectedExcel}
+                        exportAllPdfFn={handleExportAllPdf}
+                        exportCurrentPagePdf={handleCurrentPageExportPdf}
+                        exportSelectedRowsPdf={handleExportSelectedPdf}
+                        showImportButton={false}
                     />
                 </div>
 

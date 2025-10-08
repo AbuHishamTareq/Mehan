@@ -24,6 +24,7 @@ class AdminSeeder extends Seeder
 
         // Create admin user
         DB::table('users')->insert([
+            'uuid' => (string) Str::uuid(),
             'name' => 'Tareq Abdulrahman Dheeb',
             'email' => 'mob.dev@mehan.sa',
             'email_verified_at' => now(),

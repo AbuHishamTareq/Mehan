@@ -45,13 +45,20 @@ interface TableColumn {
 }
 
 export interface TableRow {
-    [key: string]: string | number | boolean | null | undefined | unknown;
+    [key: string]:
+        | string
+        | number
+        | boolean
+        | Date
+        | null
+        | undefined
+        | unknown;
 }
 
 interface TableAction {
     label: string;
     icon: keyof typeof LucidIcons;
-    route: string;
+    tooltip: string;
     className?: string;
 }
 
@@ -62,6 +69,7 @@ export interface TableActionButtonsProps {
     onView?: (row: TableRow) => void;
     onEdit?: (row: TableRow) => void;
     onDelete?: (id: number) => void;
+    onRestore?: (id: number) => void;
 }
 
 export interface CustomTableProps {
@@ -72,6 +80,7 @@ export interface CustomTableProps {
     onView?: (row: TableRow) => void;
     onEdit?: (row: TableRow) => void;
     onDelete?: (id: number) => void;
+    onRestore?: (id: number) => void;
     from: number;
     enableSelection?: boolean;
     selectedRows?: number[];
@@ -158,6 +167,7 @@ export interface PermissionProps extends TableRow {
     module: string;
     description?: string;
     is_active?: boolean;
+    removed_at: Date | null;
 }
 
 // MODULE INTERFACE
@@ -180,6 +190,7 @@ export interface RoleProps extends TableRow {
     label: string;
     description?: string;
     is_active?: boolean;
+    removed_at: Date | null;
 }
 
 // DEPARTMENT INTERFACE
@@ -188,6 +199,6 @@ export interface DepartmentProps extends TableRow {
     en_name: string;
     ar_name: string;
     is_active?: boolean;
-    is_deleted?: boolean;
-    deleted?: string;
+    removed_at: Date | null;
+    removed: string;
 }

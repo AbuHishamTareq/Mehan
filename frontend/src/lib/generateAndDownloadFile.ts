@@ -3,15 +3,12 @@ import { saveAs } from "file-saver";
 import pdfMake from "pdfmake/build/pdfmake";
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
 
-// 1️⃣ Import your font Base64 string
 import JannaFontBase64 from "../assets/fonts/Janna-LT-Bold";
 
-// 2️⃣ Setup pdfMake virtual file system
 (pdfMake as any).vfs = {
     "Janna-LT-Bold.ttf": JannaFontBase64,
 };
 
-// 3️⃣ Define pdfMake fonts
 (pdfMake as any).fonts = {
     Janna: {
         normal: "Janna-LT-Bold.ttf",
@@ -21,9 +18,6 @@ import JannaFontBase64 from "../assets/fonts/Janna-LT-Bold";
     },
 };
 
-// --------------------
-// Utility to detect RTL text
-// --------------------
 function isRTLText(text: string): boolean {
     const rtlChars = /[\u0600-\u06FF]/; // Arabic Unicode range
     return rtlChars.test(text);
@@ -65,17 +59,11 @@ export async function generateAndDownloadFile<T>({
         return;
     }
 
-    // --------------------
-    // Filter columns
-    // --------------------
     const validColumns = columns.filter(
         (col) => !["actions", "status"].includes(col.key)
     );
     const headers = validColumns.map((col) => t(col.label));
 
-    // --------------------
-    // Prepare rows & detect RTL
-    // --------------------
     const rows: any[][] = data.map((item) =>
         validColumns.map((col) => {
             const value = (item as any)[col.key];
@@ -97,18 +85,12 @@ export async function generateAndDownloadFile<T>({
         })
     );
 
-    // --------------------
-    // CSV export
-    // --------------------
     if (type === "csv") {
         const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
         const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
         saveAs(blob, `${fileName}.csv`);
     }
 
-    // --------------------
-    // Excel export
-    // --------------------
     if (type === "excel") {
         const workbook = new ExcelJS.Workbook();
         const sheet = workbook.addWorksheet("Data");
@@ -127,13 +109,12 @@ export async function generateAndDownloadFile<T>({
             cell.alignment = { horizontal: "center" };
         });
 
-        // Style cells based on RTL/LTR
         sheet.eachRow((row) => {
             row.eachCell((cell) => {
                 cell.alignment = {
                     horizontal: isRTLText(cell.value?.toString() || "")
-                        ? "left"
-                        : "right",
+                        ? "right"
+                        : "left",
                 };
             });
         });
@@ -142,9 +123,6 @@ export async function generateAndDownloadFile<T>({
         saveAs(new Blob([buffer]), `${fileName}.xlsx`);
     }
 
-    // --------------------
-    // PDF export
-    // --------------------
     if (type === "pdf") {
         const docDefinition: TDocumentDefinitions = {
             pageSize: "A4",

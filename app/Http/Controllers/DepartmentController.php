@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\DepartmentsImport;
 use App\Models\Department;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DepartmentController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Department::query();
+        $query = Department::withTrashed();
 
         if ($search = $request->query('search')) {
             $query->where("en_name", "ilike", "%{$search}%")
@@ -29,8 +33,8 @@ class DepartmentController extends Controller
                 "en_name" => $department->en_name,
                 "ar_name" => $department->ar_name,
                 "is_active" => $department->is_active,
-                "is_deleted" => $department->is_deleted,
-                "deleted" => $department->is_deleted === true ? "Yes" : "No",
+                "removed_at" => $department->removed_at,
+                "removed" => $department->removed_at ? "Yes" : "No"
             ];
         });
 
@@ -50,7 +54,6 @@ class DepartmentController extends Controller
             "en_name" => $request->input("en_name"),
             "ar_name" => $request->input("ar_name"),
             "is_active" => $request->input("is_active") ?? true,
-            "is_deleted" => $request->input("is_deleted") ?? false,
             "created_by" => Auth::id()
         ]);
 
@@ -104,20 +107,20 @@ class DepartmentController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Department::whereIn("id", $ids)->update([
+        $updated = Department::whereIn("id", $ids)->whereNull("removed_at")->update([
             "is_active" => true
         ]);
 
         if ($updated > 0) {
             return response()->json([
-                "message" => "Selected items deactivated successfully.",
+                "message" => "Selected items activate successfully.",
                 "count" => $updated,
                 "status" => 200
             ], 200);
         }
 
         return response()->json([
-            "message" => "Failed to deactivate departments. Please try again later.",
+            "message" => "Failed to activate departments. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -140,20 +143,20 @@ class DepartmentController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Department::whereIn("id", $ids)->update([
+        $updated = Department::whereIn("id", $ids)->whereNull("removed_at")->update([
             "is_active" => false
         ]);
 
         if ($updated > 0) {
             return response()->json([
-                "message" => "Selected items activated successfully.",
+                "message" => "Selected items deactivated successfully.",
                 "count" => $updated,
                 "status" => 200
             ], 200);
         }
 
         return response()->json([
-            "message" => "Failed to activate departments. Please try again later.",
+            "message" => "Failed to deactivate departments. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -194,15 +197,85 @@ class DepartmentController extends Controller
             ], 404);
         }
 
-        $updated = Department::where("id", $id)->update([
-            "is_active" => false,
-            "is_deleted" => true,
-            "deleted_by" => Auth::id()
-        ]);
+        $department->delete();
 
         return response()->json([
-            "message" => "Department deleted Successfully !",
+            "message" => "Department deleted successfully !",
             "status" => 200
         ], 200);
+    }
+
+    public function restore($id): JsonResponse
+    {
+        $department = Department::withTrashed()->find($id);
+
+        if (!$department) {
+            return response()->json([
+                "message" => "Department not found !",
+                "status" => 404
+            ], 404);
+        }
+
+        $department->restore();
+
+        return response()->json([
+            "message" => "Department restored successfully !",
+            "status" => 200
+        ], 200);
+    }
+
+    public function import(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx,xls|max:10240',
+        ]);
+
+        try {
+            $file = $request->file("file");
+            $import = new DepartmentsImport;
+
+            Excel::import($import, $file);
+
+            $stats = $import->getImportStats();
+
+            $failures = $import->failures();
+            $errors = $import->errors();
+
+            $response = [
+                'message' => 'Import completed successfully!',
+                'stats' => $stats,
+                'imported_count' => $stats['imported'],
+                'skipped_count' => $stats['skipped'],
+                'total_processed' => $stats['total_processed']
+            ];
+
+            // Add errors if any
+            if (!empty($errors) || !empty($failures)) {
+                $response['warnings'] = [];
+
+                // Add custom errors
+                if (!empty($stats['errors'])) {
+                    $response['warnings'] = array_merge($response['warnings'], $stats['errors']);
+                }
+
+                // Add validation failures
+                foreach ($failures as $failure) {
+                    $response['warnings'][] = "Row {$failure->row()}: " . implode(', ', $failure->errors());
+                }
+            }
+
+            info($response);
+
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "message" => "Something went wrong: " . $e,
+                "status" => 500
+            ], 500);
+        }
+        return response()->json([
+            "message" => "Failed to import departmens data. Please try again later.",
+            "status" => 500
+        ], 500);
     }
 }

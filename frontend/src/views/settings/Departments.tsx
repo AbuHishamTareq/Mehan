@@ -10,12 +10,15 @@ import { useToast } from "../../hooks/use-toast";
 import type { DepartmentProps, LinkProps } from "../../../types/types";
 import { Pagination } from "../../components/ui/pagination";
 import { Input } from "../../components/ui/input";
-import { Search } from "lucide-react";
+import { FileText, Search, Upload } from "lucide-react";
 import { DepartmentController } from "../../controllers/DepartmentController";
 import { DepartmentModelFormConfig } from "../../config/forms/department-model-form";
 import { BulkAction } from "../../components/bulk-action";
 import Swal from "sweetalert2";
 import { generateAndDownloadFile } from "../../lib/generateAndDownloadFile";
+import { Button } from "../../components/ui/button";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 interface DepartmentFormValue {
     en_name: string;
@@ -56,6 +59,8 @@ const Departments = () => {
     const [mode, setMode] = useState<"create" | "view" | "edit">("create");
     const [selectedDepartment, setSelectedDepartment] =
         useState<DepartmentProps | null>(null);
+    const [isImportOpen, setIsImportOpen] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
 
     type ExportType = "csv" | "excel" | "pdf";
     type ExportScope = "all" | "current" | "selected";
@@ -229,7 +234,7 @@ const Departments = () => {
 
         const result = await Swal.fire({
             title: "Are you sure?",
-            text: `You are about to delete "${department.en_name}". This action cannot be undone!`,
+            text: `You are about to delete "${department.en_name}" !`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#dc2626", // red
@@ -256,15 +261,51 @@ const Departments = () => {
         }
     };
 
-    const exportDepartments = (type: ExportType, scope: ExportScope) => {
-        const font = isRTL ? "font-arabic" : "font-english";
-        const allDepartments = departments.departments.data;
+    const handleRestore = async (id: number) => {
+        const department = departments.departments.data.find(
+            (d) => d.id === id
+        );
+        if (!department) return;
 
-        let dataToExport = allDepartments;
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: `You are about to restore "${department.en_name}" !`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#2E6F40", // dark green
+            cancelButtonColor: "#dc2626", // red
+            confirmButtonText: "Yes, restore it!",
+            cancelButtonText: "Cancel",
+            reverseButtons: true,
+            background: "#f9fafb",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await DepartmentController.restoreDepartment(id);
+                toast({
+                    title: "Notification",
+                    description: t("departmentRestoreMessage"),
+                    variant: "success",
+                    className: isRTL ? "font-arabic" : "font-english",
+                });
+                fetchDepartmentData(searchValue, currentPerPage);
+            } catch (error) {
+                console.error("Somthing went wrong: ", error);
+            }
+        }
+    };
+
+    // EXPORT TO CSV, EXCEL AND PDF
+    const exportData = (type: ExportType, scope: ExportScope) => {
+        const font = isRTL ? "font-arabic" : "font-english";
+        const data = departments.departments.data;
+
+        let dataToExport = data;
         let fileName = "departments";
 
         if (scope === "current") {
-            dataToExport = allDepartments; // if you want pagination, replace with current page slice
+            dataToExport = data; // if you want pagination, replace with current page slice
             fileName = `departments_page_${departments.departments.from}`;
         } else if (scope === "selected") {
             if (selectedRows.length === 0) {
@@ -276,9 +317,7 @@ const Departments = () => {
                 });
                 return;
             }
-            dataToExport = allDepartments.filter((d) =>
-                selectedRows.includes(d.id!)
-            );
+            dataToExport = data.filter((d) => selectedRows.includes(d.id!));
             fileName = `departments_selected_${selectedRows.length}`;
         }
 
@@ -295,49 +334,178 @@ const Departments = () => {
     // EXPORT CSV
     // EXPORT ALL PAGES TO CSV
     const handleExportAllCSV = async () => {
-        exportDepartments("csv", "all");
+        exportData("csv", "all");
     };
 
     // EXPORT CURRENT PAGE TO CSV
     const handleCurrentPageExportCSV = () => {
-        exportDepartments("csv", "current");
+        exportData("csv", "current");
     };
 
     // EXPORT SELECTED ROWS TO CSV
     const handleExportSelectedCSV = () => {
-        exportDepartments("csv", "selected");
+        exportData("csv", "selected");
     };
 
     // EXPORT EXCEL
     // EXPORT ALL PAGES TO EXCEL
     const handleExportAllExcel = async () => {
-        exportDepartments("excel", "all");
+        exportData("excel", "all");
     };
 
     // EXPORT CURRENT PAGE TO EXCEL
     const handleCurrentPageExportExcel = () => {
-        exportDepartments("excel", "current");
+        exportData("excel", "current");
     };
 
     // EXPORT SELECTED ROWS TO EXCEL
     const handleExportSelectedExcel = () => {
-        exportDepartments("excel", "selected");
+        exportData("excel", "selected");
     };
 
     // EXPORT PDF
     // EXPORT ALL PAGES TO PDF
     const handleExportAllPdf = async () => {
-        exportDepartments("pdf", "all");
+        exportData("pdf", "all");
     };
 
     // EXPORT CURRENT PAGE TO PDF
     const handleCurrentPageExportPdf = () => {
-        exportDepartments("pdf", "current");
+        exportData("pdf", "current");
     };
 
     // EXPORT SELECTED ROWS TO PDF
     const handleExportSelectedPdf = () => {
-        exportDepartments("pdf", "selected");
+        exportData("pdf", "selected");
+    };
+
+    // IMPORT EXCEL
+    // DOWNLOAD IMPORT ECVEL TEMPLATE
+    const handleDownloadTemplate = async () => {
+        try {
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet("Departments");
+
+            // Define columns with headers
+            worksheet.columns = [
+                { header: "english name*", key: "en_name", width: 25 },
+                { header: "arabic name*", key: "ar_name", width: 25 },
+            ];
+
+            // Make headers bold and required fields red
+            worksheet.getRow(1).eachCell((cell) => {
+                cell.font = {
+                    bold: true,
+                    color: {
+                        argb: cell.value?.toString().includes("*")
+                            ? "FFFF0000"
+                            : "FF000000",
+                    },
+                };
+            });
+
+            // Add example row
+            worksheet.addRow({
+                en_name: "Human Resources",
+                ar_name: "الموارد البشرية",
+            });
+
+            // Generate Excel buffer
+            const buffer = await workbook.xlsx.writeBuffer();
+
+            // Trigger download
+            const blob = new Blob([buffer], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+            saveAs(blob, "departments_import_template.xlsx");
+
+            toast({
+                title: "Success",
+                description: "Excel template downloaded successfully.",
+                variant: "success",
+            });
+        } catch (error) {
+            console.error("Excel template download failed:", error);
+            toast({
+                title: "Error",
+                description: "Failed to download Excel template.",
+                variant: "destructive",
+            });
+        }
+    };
+
+    // IMPORT THE EXCEL FILE
+    const handleImport = async (file: File) => {
+        if (!file) return;
+
+        // Validate file type
+        const allowedTypes = [
+            "text/csv",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            toast({
+                title: "Error",
+                description: "Please upload an Excel file.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        // Validate file size (10MB max)
+        if (file.size > 10 * 1024 * 1024) {
+            toast({
+                title: "Error",
+                description: "File size must be less than 10MB.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsImporting(true);
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await DepartmentController.importDepartments(
+                formData
+            );
+
+            console.log(response);
+
+            // Show success message with statistics
+            let message = `Import completed! ${response.imported_count} users imported successfully.`;
+            if (response.skipped_count > 0) {
+                message += ` ${response.skipped_count} users were skipped.`;
+            }
+
+            toast({
+                title: "Import Successful",
+                description: message,
+                variant: "success",
+            });
+
+            // Show warnings if any
+            if (response.warnings && response.warnings.length > 0) {
+                console.warn("Import warnings:", response.warnings);
+                // You could show these in a modal or additional toast
+                toast({
+                    title: "Import Warnings",
+                    description: `${response.warnings.length} warnings occurred. Check console for details.`,
+                    variant: "destructive",
+                });
+            }
+
+            // Refresh the users list
+            await fetchDepartmentData(searchValue, currentPerPage);
+        } catch (error) {
+            console.error("Import failed:", error);
+        } finally {
+            setIsImporting(false);
+        }
     };
 
     return (
@@ -378,8 +546,73 @@ const Departments = () => {
                         exportAllPdfFn={handleExportAllPdf}
                         exportCurrentPagePdf={handleCurrentPageExportPdf}
                         exportSelectedRowsPdf={handleExportSelectedPdf}
+                        onToggleImport={() => setIsImportOpen((prev) => !prev)}
+                        isImportOpen={isImportOpen}
+                        showImportButton={true}
                     />
                 </div>
+                {/* Import Section - Show above search and add button */}
+                {isImportOpen && (
+                    <div className="mb-4 border-b">
+                        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div className="flex items-center gap-2">
+                                    <Upload className="w-5 h-5 text-green-600" />
+                                    <span className="font-medium text-green-800">
+                                        Import Departments
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    {/* Download Template */}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleDownloadTemplate}
+                                        className="flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50 hover:text-black"
+                                    >
+                                        <FileText className="w-4 h-4" />
+                                        Download Template
+                                    </Button>
+
+                                    {/* Import File */}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        asChild
+                                        className="border-green-300 text-green-700 hover:bg-green-50 hover:text-black"
+                                        disabled={isImporting}
+                                    >
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <Upload className="w-4 h-4" />
+                                            {isImporting
+                                                ? "Importing..."
+                                                : "Import File"}
+                                            <input
+                                                type="file"
+                                                accept=".csv,.xlsx,.xls"
+                                                className="hidden"
+                                                onChange={(e) => {
+                                                    const file =
+                                                        e.target.files?.[0];
+                                                    if (file) {
+                                                        handleImport(file);
+                                                    }
+                                                    e.target.value = "";
+                                                }}
+                                                disabled={isImporting}
+                                            />
+                                        </label>
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="mt-2 text-sm text-green-600">
+                                Upload Excel file with columns: english name,
+                                arabic name
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Search & Add Module */}
                 <div className="flex items-center justify-between mb-2">
@@ -423,6 +656,7 @@ const Departments = () => {
                     onView={(row) => openModel("view", row as DepartmentProps)}
                     onEdit={(row) => openModel("edit", row as DepartmentProps)}
                     onDelete={handleDelete}
+                    onRestore={handleRestore}
                     isModel={true}
                     from={departments.departments.from}
                     enableSelection={true}

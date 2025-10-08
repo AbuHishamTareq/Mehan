@@ -67,6 +67,8 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
         Route::put("/bulkDeactivate", [DepartmentController::class, "bulkDeactivate"])->name("setting.departments.bulkDeactivate");
         Route::put("/activeDeactivate", [DepartmentController::class, "activeDeactivate"])->name("setting.departments.activeDeactivate");
         Route::delete("/destroy/{id}", [DepartmentController::class, "destroy"])->name("setting.departments.destroy");
+        Route::patch("/restore/{id}", [DepartmentController::class, "restore"])->name("setting.departments.restore");
+        Route::post('/import', [DepartmentController::class, 'import'])->name('setting.departments.import');
     });
 
     // Logout APIs

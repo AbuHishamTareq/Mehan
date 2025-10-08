@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { CustomTable } from "../../components/custom-table";
 import { useLanguage } from "../../hooks/useLanguage";
 import { ModuleTableConfig } from "../../config/tables/module-table";

@@ -8,6 +8,7 @@ import {
     ListChecks,
     Lock,
     Target,
+    Upload,
     UserCheck,
 } from "lucide-react";
 import {
@@ -23,14 +24,20 @@ import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { useLanguage } from "../hooks/useLanguage";
 import { useToast } from "../hooks/use-toast";
 
+export interface TableRow {
+    id?: number;
+    is_active?: boolean;
+    removed_at: Date | null;
+}
+
 interface BulkStatusOptions {
-    filterFn: (item: { id?: number; is_active?: boolean }) => boolean;
+    filterFn: (item: TableRow) => boolean;
     actionFn: (ids: number[]) => Promise<unknown>;
     successMessage?: (updated: number, total: number) => string;
     emptyMessage?: string;
 }
 
-interface BulkActionProps<T extends { id?: number; is_active?: boolean }> {
+interface BulkActionProps<T extends TableRow> {
     data: T[];
     selectedRows: number[];
     onClearSelection: () => void;
@@ -47,9 +54,12 @@ interface BulkActionProps<T extends { id?: number; is_active?: boolean }> {
     exportAllPdfFn?: () => void;
     exportCurrentPagePdf?: () => void;
     exportSelectedRowsPdf?: () => void;
+    onToggleImport?: () => void;
+    isImportOpen?: boolean;
+    showImportButton?: boolean;
 }
 
-export const BulkAction = <T extends { id?: number; is_active?: boolean }>({
+export const BulkAction = <T extends TableRow>({
     data,
     selectedRows,
     onClearSelection,
@@ -66,6 +76,9 @@ export const BulkAction = <T extends { id?: number; is_active?: boolean }>({
     exportAllPdfFn,
     exportCurrentPagePdf,
     exportSelectedRowsPdf,
+    onToggleImport,
+    isImportOpen,
+    showImportButton,
 }: BulkActionProps<T>) => {
     const { t, isRTL } = useLanguage();
     const font = isRTL ? "font-arabic" : "font-english";
@@ -90,16 +103,24 @@ export const BulkAction = <T extends { id?: number; is_active?: boolean }>({
         const selectedData = data.filter((item) =>
             selectedRows.includes(Number(item.id))
         );
+        const selectedCount = selectedData.length;
 
-        const idsToUpdate = selectedData
-            .filter(filterFn)
+        const removedRecords = selectedData.filter(
+            (item: any) => !!item.removed_at
+        );
+        const removedCount = removedRecords.length;
+
+        const candidates = selectedData.filter((item: any) => !item.removed_at);
+
+        const idsToUpdate = candidates
+            .filter((item: any) => filterFn(item as any))
             .map((item) => item.id)
             .filter((id): id is number => typeof id === "number");
 
         if (idsToUpdate.length === 0) {
             toast({
                 title: "Notification",
-                description: emptyMessage || t("InactiveIdsErrorMessage"),
+                description: emptyMessage || t("No valid rows to update."),
                 variant: "destructive",
                 className: font,
             });
@@ -107,18 +128,34 @@ export const BulkAction = <T extends { id?: number; is_active?: boolean }>({
         }
 
         try {
-            await actionFn(idsToUpdate);
+            const result = await actionFn(idsToUpdate);
 
-            const total = selectedRows.length;
-            const updated = idsToUpdate.length;
+            let updatedCount = idsToUpdate.length;
+            if (
+                result &&
+                typeof result === "object" &&
+                "count" in (result as any)
+            ) {
+                const maybeCount = (result as any).count;
+                if (typeof maybeCount === "number") {
+                    updatedCount = maybeCount;
+                }
+            }
+
+            let message = "";
+            if (successMessage) {
+                message = successMessage(updatedCount, selectedCount);
+            }
+
+            if (removedCount > 0) {
+                message += ` ${removedCount} record${
+                    removedCount > 1 ? "s were" : " was"
+                } skipped (removed).`;
+            }
 
             toast({
                 title: "Notification",
-                description: successMessage
-                    ? successMessage(updated, total)
-                    : `${updated} of ${total} selected ${title}${
-                          total > 1 ? "s" : ""
-                      } updated successfully.`,
+                description: message,
                 variant: "success",
                 className: font,
             });
@@ -127,12 +164,19 @@ export const BulkAction = <T extends { id?: number; is_active?: boolean }>({
             onClearSelection();
         } catch (error) {
             console.error("Something went wrong: ", error);
+            toast({
+                title: "Error",
+                description:
+                    t("bulkActionErrorMessage") || "Bulk update failed.",
+                variant: "destructive",
+                className: font,
+            });
         }
     };
 
     const handleBulkActivate = () =>
         handleBulkStatusChange({
-            filterFn: (item) => !item.is_active, // only inactive items
+            filterFn: (item) => !item.is_active && !item.removed_at,
             actionFn: bulkActivateFn,
             emptyMessage: t("InactiveIdsErrorMessage"),
             successMessage: (updated, total) =>
@@ -147,7 +191,7 @@ export const BulkAction = <T extends { id?: number; is_active?: boolean }>({
 
     const handleBulkDeactivate = () =>
         handleBulkStatusChange({
-            filterFn: (item) => !!item.is_active, // only active items
+            filterFn: (item) => !!item.is_active && !item.removed_at,
             actionFn: bulkDeactivateFn,
             emptyMessage: t("ActiveIdsErrorMessage"),
             successMessage: (updated, total) =>
@@ -357,6 +401,20 @@ export const BulkAction = <T extends { id?: number; is_active?: boolean }>({
                             </DropdownMenuSub>
                         </DropdownMenuContent>
                     </DropdownMenu>
+
+                    {showImportButton && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={onToggleImport}
+                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl"
+                        >
+                            <Upload className="w-4 h-4" />
+                            {isImportOpen
+                                ? "Close Import Dialog"
+                                : "Open Import Dialog"}
+                        </Button>
+                    )}
 
                     <Button
                         variant="ghost"

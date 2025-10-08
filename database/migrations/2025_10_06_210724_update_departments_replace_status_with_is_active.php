@@ -11,21 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('departments', function (Blueprint $table) {
-            if (Schema::hasColumn('departments', 'status')) {
+        Schema::table("departments", function (Blueprint $table) {
+            if (Schema::hasColumn("departments", "status")) {
                 try {
-                    $table->dropIndex(['status']);
+                    $table->dropIndex(["status"]);
                 } catch (\Exception $e) {
                     // Ignore if index doesn't exist
                 }
-                $table->dropColumn('status');
+                $table->dropColumn("status");
             }
 
-            $table->boolean('is_active')->default(true)->after('ar_name');
-            $table->boolean('is_deleted')->default(false)->after('is_active');
-            $table->integer('deleted_by')->nullable();
-            $table->index('is_active');
-            $table->index('is_deleted');
+            $table->boolean("is_active")->default(true)->after("ar_name");
+            $table->integer("removed_by")->nullable();
+            $table->integer("restored_by")->nullable();
+            $table->softDeletes("removed_at");
+            $table->index("is_active");
         });
     }
 
@@ -34,23 +34,26 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('departments', function (Blueprint $table) {
-            if (Schema::hasColumn('departments', 'is_active')) {
-                $table->dropIndex(['is_active']);
-                $table->dropColumn('is_active');
+        Schema::table("departments", function (Blueprint $table) {
+            if (Schema::hasColumn("departments", "is_active")) {
+                $table->dropIndex(["is_active"]);
+                $table->dropColumn("is_active");
             }
 
-            if (Schema::hasColumn('departments', 'is_deleted')) {
-                $table->dropIndex(['is_deleted']);
-                $table->dropColumn('is_deleted');
+            if (Schema::hasColumn("departments", "removed_by")) {
+                $table->dropColumn("removed_by");
             }
 
-            if (Schema::hasColumn('departments', 'deleted_by')) {
-                $table->dropColumn('deleted_by');
+            if (Schema::hasColumn("departments", "restored_by")) {
+                $table->dropColumn("restored_by");
             }
 
-            $table->enum('status', ['active', 'inactive'])->default('active')->after('ar_name');
-            $table->index('status');
+            if (Schema::hasColumn("departments", "removed_at")) {
+                $table->dropColumn("removed_at");
+            }
+
+            $table->enum("status", ["active", "inactive"])->default("active")->after("ar_name");
+            $table->index("status");
         });
     }
 };

@@ -78,8 +78,9 @@ const en = {
     designationSubtitle:
         "Define and manage job designations to maintain role clarity and organizational structure.",
     modulesTitle: "Modules Management",
-    modulesSubtitle: "Manage and configure system modules to enhance functionality and performance.",
-    
+    modulesSubtitle:
+        "Manage and configure system modules to enhance functionality and performance.",
+
     // Permissions
     permission: "Permission",
     module: "Module",
@@ -97,12 +98,14 @@ const en = {
     // Bulk Action
     bulkErrorMessage: "You must select at least one Record.",
     InactiveIdsErrorMessage: "All of the selected data is already active.",
+    ActiveIdsErrorMessage: "All of the selected data is already inactive.",
 
     // Departments
     engName: "English Name",
     arName: "Arabic Name",
-    deleted: "Deleted?",
-    departmentDeleteMessage: "Department Deleted Successfully !"
+    removed: "Deleted?",
+    departmentDeleteMessage: "Department deleted successfully !",
+    departmentRestoreMessage: "Department restored successfully !",
 };
 
 export default en;

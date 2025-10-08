@@ -2,25 +2,33 @@
 
 namespace App\Models;
 
+use App\Traits\BlameableSoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class Department extends Model
 {
-    use HasFactory, Notifiable, HasApiTokens, HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, SoftDeletes, BlameableSoftDeletes;
 
     protected $table = "departments";
 
     protected $fillable = [
-        "en_name",
-        "ar_name",
-        "status",
-        "created_by",
-        "updated_by",
+        'en_name',
+        'ar_name',
+        'is_active',
+        'created_by',
+        'updated_by',
+        'removed_by',
+        'restored_by',
+        'removed_at',
     ];
+
+    protected $dates = ['removed_at'];
+    const DELETED_AT = 'removed_at';
 
     // Relations //
 
@@ -51,6 +59,12 @@ class Department extends Model
     // Users who updated this department
     public function destroyer()
     {
-        return $this->belongsTo(User::class, "deleted_by");
+        return $this->belongsTo(User::class, "removed_by");
+    }
+
+    // Users who updated this department
+    public function restorer()
+    {
+        return $this->belongsTo(User::class, "restored_by");
     }
 }
