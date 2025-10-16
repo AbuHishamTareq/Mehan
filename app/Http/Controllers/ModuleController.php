@@ -12,7 +12,7 @@ class ModuleController extends Controller
         $query = Module::query();
 
         if($search = $request->query('search')) {
-            $query->where("label", "ilike", "%{$search}%");
+            $query->where("label", "like", "%{$search}%");
         }
 
         $perPage = $request->query('perPage', 10);

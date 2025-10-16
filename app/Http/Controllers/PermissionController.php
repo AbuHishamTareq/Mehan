@@ -17,10 +17,10 @@ class PermissionController extends Controller
 
         if ($search = $request->query("search")) {
             $query->where(function ($q) use ($search) {
-                $q->where("label", "ilike", "%{$search}%")
-                    ->orWhere("description", "ilike", "%{$search}%")
+                $q->where("label", "like", "%{$search}%")
+                    ->orWhere("description", "like", "%{$search}%")
                     ->orWhereHas("module", function ($mq) use ($search) {
-                        $mq->where("label", "ilike", "%{$search}%");
+                        $mq->where("label", "like", "%{$search}%");
                     });
             });
         }

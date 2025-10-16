@@ -16,8 +16,8 @@ class RoleController extends Controller
         $query = Role::query()->with("permissions");
 
         if ($search = $request->query("search")) {
-            $query->where("label", "ilike", "%{$search}%")
-                ->orWhere("description", "ilike", "%{$search}%");
+            $query->where("label", "like", "%{$search}%")
+                ->orWhere("description", "like", "%{$search}%");
         }
 
         $perPage = $request->query("perPage", 10);

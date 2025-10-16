@@ -100,11 +100,17 @@ const ar = {
     ActiveIdsErrorMessage: "جميع البيانات المحددة غير نشطة بالفعل.",
 
     // Departments
-    engName: "الاسم بالانجليزية",
-    arName: "الاسم بالعربية",
+    engName: "القسم بالانجليزية",
+    arName: "القسم بالعربية",
     removed: "تم حذفه؟",
     departmentDeleteMessage: "تم حذف القسم بنجاح !",
     departmentRestoreMessage: "تم استرجاع القسم بنجاح !",
+
+    //Designations
+    en_designation: "المسمى الوظيفي بالانجليزية",
+    ar_designation: "المسمى الوظيفي بالعربية",
+    designationDeleteMessage: "تم حذف المسمى الوظيفي بنجاح !",
+    designationRestoreMessage: "تم استرجاع المسمى الوظيفي بنجاح !",
 };
 
 export default ar;

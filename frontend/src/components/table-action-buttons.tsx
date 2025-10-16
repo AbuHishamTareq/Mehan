@@ -20,10 +20,10 @@ export const TableActionButtons = ({
                     action.icon as keyof typeof LucidIcons
                 ] as React.ElementType;
 
-                // DELETE FUNCTIONALITY
+                // DELETE
                 if (action.label === "Delete") {
                     return (
-                        <Tooltip>
+                        <Tooltip key={`delete-${row.id}-${index}`}>
                             <TooltipTrigger asChild>
                                 <Button
                                     className={action.className}
@@ -38,10 +38,10 @@ export const TableActionButtons = ({
                     );
                 }
 
-                // RESTORE FUNCTIONALITY
+                // RESTORE
                 if (action.label === "Restore") {
                     return (
-                        <Tooltip>
+                        <Tooltip key={`restore-${row.id}-${index}`}>
                             <TooltipTrigger asChild>
                                 <Button
                                     className={action.className}
@@ -56,49 +56,44 @@ export const TableActionButtons = ({
                     );
                 }
 
-                if (isModel) {
-                    if (action.label === "View") {
-                        return (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        key={index}
-                                        className={action.className}
-                                        onClick={() => onView?.(row)}
-                                    >
-                                        <IconComponent size={18} />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    {action.tooltip}
-                                </TooltipContent>
-                            </Tooltip>
-                        );
-                    }
-
-                    if (action.label === "Edit") {
-                        return (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        key={index}
-                                        className={action.className}
-                                        onClick={() => onEdit?.(row)}
-                                    >
-                                        <IconComponent size={18} />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    {action.tooltip}
-                                </TooltipContent>
-                            </Tooltip>
-                        );
-                    }
+                // VIEW
+                if (isModel && action.label === "View") {
+                    return (
+                        <Tooltip key={`view-${row.id}-${index}`}>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    className={action.className}
+                                    onClick={() => onView?.(row)}
+                                >
+                                    <IconComponent size={18} />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{action.tooltip}</TooltipContent>
+                        </Tooltip>
+                    );
                 }
 
+                // EDIT
+                if (isModel && action.label === "Edit") {
+                    return (
+                        <Tooltip key={`edit-${row.id}-${index}`}>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    className={action.className}
+                                    onClick={() => onEdit?.(row)}
+                                >
+                                    <IconComponent size={18} />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{action.tooltip}</TooltipContent>
+                        </Tooltip>
+                    );
+                }
+
+                // LINK
                 return (
                     <Link
-                        key={index}
+                        key={`link-${row.id}-${index}`}
                         to={`/${row.id}`}
                         className={action.className}
                     >

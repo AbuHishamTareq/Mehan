@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
@@ -69,6 +70,19 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
         Route::delete("/destroy/{id}", [DepartmentController::class, "destroy"])->name("setting.departments.destroy");
         Route::patch("/restore/{id}", [DepartmentController::class, "restore"])->name("setting.departments.restore");
         Route::post('/import', [DepartmentController::class, 'import'])->name('setting.departments.import');
+    });
+
+    // Settings/Designations APIs
+    Route::prefix("designations")->group(function () {
+        Route::get("/index", [DesignationController::class, "index"])->name("setting.designations.index");
+        Route::post("/store", [DesignationController::class, "store"])->name("setting.designations.store");
+        Route::put("/update/{id}", [DesignationController::class, "update"])->name("setting.designations.update");
+        Route::put("/bulkActivate", [DesignationController::class, "bulkActivate"])->name("setting.designations.bulkActivate");
+        Route::put("/bulkDeactivate", [DesignationController::class, "bulkDeactivate"])->name("setting.designations.bulkDeactivate");
+        Route::put("/activeDeactivate", [DesignationController::class, "activeDeactivate"])->name("setting.designations.activeDeactivate");
+        Route::delete("/destroy/{id}", [DesignationController::class, "destroy"])->name("setting.designations.destroy");
+        Route::patch("/restore/{id}", [DesignationController::class, "restore"])->name("setting.designations.restore");
+        Route::post('/import', [DesignationController::class, 'import'])->name('setting.designations.import');
     });
 
     // Logout APIs

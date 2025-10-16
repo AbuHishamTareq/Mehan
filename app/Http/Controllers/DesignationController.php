@@ -2,41 +2,61 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\DepartmentsImport;
+use App\Imports\DesignationImport;
+use App\Imports\ResignationImport;
 use App\Models\Department;
+use App\Models\Designation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
-class DepartmentController extends Controller
+class DesignationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Department::withTrashed();
+        $query = Designation::withTrashed()->with("department");
 
-        if ($search = $request->query('search')) {
-            $query->where("en_name", "like", "%{$search}%")
-                ->orWhere("ar_name", "like", "%{$search}%");
+        if ($search = $request->query("search")) {
+            $query->where(function ($q) use ($search) {
+                $q->where("en_name", "like", "%{$search}%")
+                    ->orWhere("en_name", "like", "%{$search}%")
+                    ->orWhereHas("department", function ($mq) use ($search) {
+                        $mq->where("en_name", "like", "%{$search}%");
+                    });
+            });
         }
 
-        $perPage = $request->query('perPage', 10);
+        $perPage = $request->query("perPage", 10);
 
-        $departments = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        $designations = $query->orderBy("created_at", "DESC")->paginate($perPage);
 
-        $departments = $departments->through(function ($department) {
+        $designations = $designations->through(function ($designation) {
             return [
-                "id" => $department->id,
-                "en_name" => $department->en_name,
-                "ar_name" => $department->ar_name,
-                "is_active" => $department->is_active,
-                "removed_at" => $department->removed_at,
-                "removed" => $department->removed_at ? "Yes" : "No"
+                "id" => $designation->id,
+                "en_name" => $designation->en_name,
+                "ar_name" => $designation->ar_name,
+                "department_id" => $designation->department_id,
+                "is_active" => $designation->is_active,
+                "department" => $designation->department->en_name,
+                "removed_at" => $designation->removed_at,
+                "removed" => $designation->removed_at ? "Yes" : "No"
             ];
         });
 
+        $departments = Department::where('is_active', true)
+            ->get() // Use get() to get a Collection
+            ->map(function ($department) {
+                return [
+                    "label" => $department->en_name . " (" . $department->ar_name . ")",
+                    "value" => $department->id,
+                    "key"   => $department->id,
+                ];
+            });
+
         return response()->json([
+            "designations" => $designations,
             "departments" => $departments
         ]);
     }
@@ -45,19 +65,21 @@ class DepartmentController extends Controller
     {
         $request->validate([
             "en_name" => "required|string",
-            "ar_name" => "required|string"
+            "ar_name" => "required|string",
+            "department" => "required|numeric",
         ]);
 
-        $department = Department::create([
+        $designation = Designation::create([
             "en_name" => $request->input("en_name"),
             "ar_name" => $request->input("ar_name"),
+            "department_id" => $request->input("department"),
             "is_active" => $request->input("is_active") ?? true,
             "created_by" => Auth::id()
         ]);
 
-        if ($department) {
+        if ($designation) {
             return response()->json([
-                "message" => "Department created successfully",
+                "message" => "Designation created successfully",
                 "status" => 201 // HTTP status code for Created
             ], 201);
         }
@@ -72,25 +94,27 @@ class DepartmentController extends Controller
     {
         $request->validate([
             "en_name" => "required|string",
-            "ar_name" => "required|string"
+            "ar_name" => "required|string",
+            "department" => "required|numeric",
         ]);
 
-        $department = Department::find($id);
+        $designation = Designation::find($id);
 
-        if (!$department) {
+        if (!$designation) {
             return response()->json([
-                "message" => "Department not found",
+                "message" => "Designation not found",
                 "status" => 404
             ], 404);
         }
 
-        $department->en_name = $request->input("en_name");
-        $department->ar_name = $request->input("ar_name");
-        $department->updated_by = Auth::id();
-        $department->save();
+        $designation->en_name = $request->input("en_name");
+        $designation->ar_name = $request->input("ar_name");
+        $designation->department_id = $request->input("department");
+        $designation->updated_by = Auth::id();
+        $designation->save();
 
         return response()->json([
-            "message" => "Department updated successfully",
+            "message" => "Designation updated successfully",
             "status" => 200
         ], 200);
     }
@@ -99,12 +123,12 @@ class DepartmentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "ids" => "required|array|min:1",
-            "ids.*" => "integer|exists:departments,id"
+            "ids.*" => "integer|exists:designations,id"
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                "message" => "Invalid department IDs provided.",
+                "message" => "Invalid designation IDs provided.",
                 "details" => $validator->errors(),
                 "status" => 422
             ], 422);
@@ -112,7 +136,7 @@ class DepartmentController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Department::whereIn("id", $ids)->whereNull("removed_at")->update([
+        $updated = Designation::whereIn("id", $ids)->whereNull("removed_at")->update([
             "is_active" => true
         ]);
 
@@ -125,7 +149,7 @@ class DepartmentController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to activate departments. Please try again later.",
+            "message" => "Failed to activate designations. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -135,12 +159,12 @@ class DepartmentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "ids" => "required|array|min:1",
-            "ids.*" => "integer|exists:departments,id"
+            "ids.*" => "integer|exists:designations,id"
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                "message" => "Invalid department IDs provided.",
+                "message" => "Invalid designation IDs provided.",
                 "details" => $validator->errors(),
                 "status" => 422
             ], 422);
@@ -148,7 +172,7 @@ class DepartmentController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Department::whereIn("id", $ids)->whereNull("removed_at")->update([
+        $updated = Designation::whereIn("id", $ids)->whereNull("removed_at")->update([
             "is_active" => false
         ]);
 
@@ -161,7 +185,7 @@ class DepartmentController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to deactivate departments. Please try again later.",
+            "message" => "Failed to deactivate designations. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -172,7 +196,7 @@ class DepartmentController extends Controller
         $id = $request->input("id");
         $is_active = $request->input("is_active");
 
-        $updated = Department::where("id", $id)->update([
+        $updated = Designation::where("id", $id)->update([
             "is_active" => $is_active
         ]);
 
@@ -185,7 +209,7 @@ class DepartmentController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to activate departments. Please try again later.",
+            "message" => "Failed to activate designations. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -193,38 +217,38 @@ class DepartmentController extends Controller
 
     public function destroy($id): JsonResponse
     {
-        $department = Department::find($id);
+        $designation = Designation::find($id);
 
-        if (!$department) {
+        if (!$designation) {
             return response()->json([
-                "message" => "Department not found !",
+                "message" => "Designation not found !",
                 "status" => 404
             ], 404);
         }
 
-        $department->delete();
+        $designation->delete();
 
         return response()->json([
-            "message" => "Department deleted successfully !",
+            "message" => "Designation deleted successfully !",
             "status" => 200
         ], 200);
     }
 
     public function restore($id): JsonResponse
     {
-        $department = Department::withTrashed()->find($id);
+        $designation = Designation::withTrashed()->find($id);
 
-        if (!$department) {
+        if (!$designation) {
             return response()->json([
-                "message" => "Department not found !",
+                "message" => "Designation not found !",
                 "status" => 404
             ], 404);
         }
 
-        $department->restore();
+        $designation->restore();
 
         return response()->json([
-            "message" => "Department restored successfully !",
+            "message" => "Designation restored successfully !",
             "status" => 200
         ], 200);
     }
@@ -237,7 +261,7 @@ class DepartmentController extends Controller
 
         try {
             $file = $request->file("file");
-            $import = new DepartmentsImport;
+            $import = new DesignationImport;
 
             Excel::import($import, $file);
 
@@ -279,7 +303,7 @@ class DepartmentController extends Controller
             ], 500);
         }
         return response()->json([
-            "message" => "Failed to import departmens data. Please try again later.",
+            "message" => "Failed to import designations data. Please try again later.",
             "status" => 500
         ], 500);
     }

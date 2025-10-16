@@ -101,11 +101,17 @@ const en = {
     ActiveIdsErrorMessage: "All of the selected data is already inactive.",
 
     // Departments
-    engName: "English Name",
-    arName: "Arabic Name",
+    engName: "Department (EN)",
+    arName: "Department (AR)",
     removed: "Deleted?",
     departmentDeleteMessage: "Department deleted successfully !",
     departmentRestoreMessage: "Department restored successfully !",
+
+    //Designations
+    en_designation: "Designation (EN)",
+    ar_designation: "Designation (AR)",
+    designationDeleteMessage: "Designation deleted successfully !",
+    designationRestoreMessage: "Designation restored successfully !",
 };
 
 export default en;

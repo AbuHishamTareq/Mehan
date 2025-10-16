@@ -202,3 +202,15 @@ export interface DepartmentProps extends TableRow {
     removed_at: Date | null;
     removed: string;
 }
+
+// DESIGNATIONS INTERFACE
+export interface DesignationProps extends TableRow {
+    id?: number;
+    en_name: string;
+    ar_name: string;
+    department_id: number;
+    department: string;
+    is_active?: boolean;
+    removed_at: Date | null;
+    removed: string;
+}

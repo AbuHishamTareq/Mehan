@@ -11,11 +11,9 @@ import {
     Dialog,
     DialogClose,
     DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
     DialogTrigger,
+    DialogTitle,
+    DialogDescription,
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -56,66 +54,87 @@ export function CustomModelForm<T extends FieldValues>({
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[850px]">
-                <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>{description}</DialogDescription>
-                </DialogHeader>
-                <form onSubmit={onSubmit}>
-                    <div className="grid gap-4">
-                        {fields.map((field) => (
-                            <div key={field.key} className="grid gap-3">
-                                <Label htmlFor={field.id}>{field.label}</Label>
-                                {field.type === "text" ? (
-                                    <>
-                                        <Input
-                                            id={field.id}
-                                            {...register(field.name as Path<T>)}
-                                            type={field.type}
-                                            tabIndex={field.tabIndex}
-                                            autoFocus={field.autofocus}
-                                            placeholder={field.placeholder}
-                                            disabled={mode === "view"}
-                                        />
-                                        {errors[field.name as keyof T]
-                                            ?.message && (
-                                            <p className="text-red-500 text-sm">
-                                                {
-                                                    errors[
-                                                        field.name as keyof T
-                                                    ]?.message as string
-                                                }
-                                            </p>
-                                        )}
-                                    </>
-                                ) : field.type === "select" ? (
-                                    <Controller
-                                        control={control}
-                                        defaultValue={
-                                            "" as PathValue<T, Path<T>>
-                                        }
-                                        name={field.name as Path<T>}
-                                        render={({
-                                            field: { onChange, value },
-                                        }) => (
-                                            <>
-                                                <Select
-                                                    value={value}
-                                                    onValueChange={onChange}
-                                                    disabled={mode === "view"}
-                                                >
-                                                    {/* WORKING AS A PLACEHOLDER FOR SELECT */}
-                                                    <SelectTrigger>
-                                                        <SelectValue
-                                                            placeholder={
-                                                                field.placeholder
-                                                            }
-                                                        />
-                                                    </SelectTrigger>
-                                                    {/* OPTIONS TO FILL THE LIST */}
-                                                    <SelectContent>
-                                                        {field.options &&
-                                                            field.options?.map(
+            <DialogContent className="sm:max-w-[1024px] max-h-[90vh] p-0">
+                {/* Card Container */}
+                <div className="flex flex-col bg-white shadow-md rounded-lg overflow-hidden max-h-[90vh]">
+                    {/* Card Header */}
+                    <div className="p-6 border-b">
+                        <DialogTitle className="text-xl font-bold">
+                            {title}
+                        </DialogTitle>
+                        {description && (
+                            <DialogDescription className="text-sm text-gray-500 mt-1">
+                                {description}
+                            </DialogDescription>
+                        )}
+                    </div>
+
+                    {/* Card Body + Footer Inside Form */}
+                    <form
+                        onSubmit={onSubmit}
+                        className="flex flex-col flex-1 overflow-y-auto"
+                    >
+                        {/* Fields Section */}
+                        <div className="p-6 grid gap-4 flex-1 overflow-y-auto">
+                            {fields.map((field) => (
+                                <div key={field.key} className="grid gap-3">
+                                    <Label htmlFor={field.id}>
+                                        {field.label}
+                                    </Label>
+
+                                    {/* TEXT FIELD */}
+                                    {field.type === "text" ? (
+                                        <>
+                                            <Input
+                                                id={field.id}
+                                                {...register(
+                                                    field.name as Path<T>
+                                                )}
+                                                type={field.type}
+                                                tabIndex={field.tabIndex}
+                                                autoFocus={field.autofocus}
+                                                placeholder={field.placeholder}
+                                                disabled={mode === "view"}
+                                            />
+                                            {errors[field.name as keyof T]
+                                                ?.message && (
+                                                <p className="text-red-500 text-sm">
+                                                    {
+                                                        errors[
+                                                            field.name as keyof T
+                                                        ]?.message as string
+                                                    }
+                                                </p>
+                                            )}
+                                        </>
+                                    ) : field.type === "select" ? (
+                                        /* SELECT FIELD */
+                                        <Controller
+                                            control={control}
+                                            defaultValue={
+                                                "" as PathValue<T, Path<T>>
+                                            }
+                                            name={field.name as Path<T>}
+                                            render={({
+                                                field: { onChange, value },
+                                            }) => (
+                                                <>
+                                                    <Select
+                                                        value={value}
+                                                        onValueChange={onChange}
+                                                        disabled={
+                                                            mode === "view"
+                                                        }
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue
+                                                                placeholder={
+                                                                    field.placeholder
+                                                                }
+                                                            />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {field.options?.map(
                                                                 (option) => (
                                                                     <SelectItem
                                                                         key={
@@ -129,34 +148,36 @@ export function CustomModelForm<T extends FieldValues>({
                                                                     </SelectItem>
                                                                 )
                                                             )}
-                                                    </SelectContent>
-                                                </Select>
-
-                                                {errors[field.name as keyof T]
-                                                    ?.message && (
-                                                    <p className="text-red-500 text-sm">
-                                                        {
-                                                            errors[
-                                                                field.name as keyof T
-                                                            ]?.message as string
-                                                        }
-                                                    </p>
-                                                )}
-                                            </>
-                                        )}
-                                    />
-                                ) : field.type === "textarea" ? (
-                                    <textarea
-                                        id={field.id}
-                                        placeholder={field.placeholder}
-                                        rows={field.rows}
-                                        tabIndex={field.tabIndex}
-                                        {...register(field.name as Path<T>)}
-                                        className={field.className}
-                                        disabled={mode === "view"}
-                                    />
-                                ) : field.type === "checkbox" ? (
-                                    <>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    {errors[
+                                                        field.name as keyof T
+                                                    ]?.message && (
+                                                        <p className="text-red-500 text-sm">
+                                                            {
+                                                                errors[
+                                                                    field.name as keyof T
+                                                                ]
+                                                                    ?.message as string
+                                                            }
+                                                        </p>
+                                                    )}
+                                                </>
+                                            )}
+                                        />
+                                    ) : field.type === "textarea" ? (
+                                        /* TEXTAREA FIELD */
+                                        <textarea
+                                            id={field.id}
+                                            placeholder={field.placeholder}
+                                            rows={field.rows}
+                                            tabIndex={field.tabIndex}
+                                            {...register(field.name as Path<T>)}
+                                            className={field.className}
+                                            disabled={mode === "view"}
+                                        />
+                                    ) : field.type === "checkbox" ? (
+                                        /* CHECKBOX GROUP FIELD */
                                         <Controller
                                             control={control}
                                             name={field.name as Path<T>}
@@ -250,7 +271,6 @@ export function CustomModelForm<T extends FieldValues>({
                                                             </div>
                                                         )
                                                     )}
-                                                    {/* Error message */}
                                                     {(
                                                         errors[
                                                             field.name as keyof T
@@ -269,63 +289,67 @@ export function CustomModelForm<T extends FieldValues>({
                                                 </div>
                                             )}
                                         />
-                                    </>
-                                ) : (
-                                    <>
-                                        <Input
-                                            id={field.id}
-                                            {...register(field.name as Path<T>)}
-                                            type={field.type}
-                                            tabIndex={field.tabIndex}
-                                            autoFocus={field.autofocus}
-                                            disabled={mode === "view"}
-                                        />
-                                        {errors[field.name as keyof T]
-                                            ?.message && (
-                                            <p className="text-red-500 text-sm">
-                                                {
-                                                    errors[
-                                                        field.name as keyof T
-                                                    ]?.message as string
-                                                }
-                                            </p>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        ))}
-                    </div>
+                                    ) : (
+                                        /* OTHER INPUT TYPES */
+                                        <>
+                                            <Input
+                                                id={field.id}
+                                                {...register(
+                                                    field.name as Path<T>
+                                                )}
+                                                type={field.type}
+                                                tabIndex={field.tabIndex}
+                                                autoFocus={field.autofocus}
+                                                disabled={mode === "view"}
+                                            />
+                                            {errors[field.name as keyof T]
+                                                ?.message && (
+                                                <p className="text-red-500 text-sm">
+                                                    {
+                                                        errors[
+                                                            field.name as keyof T
+                                                        ]?.message as string
+                                                    }
+                                                </p>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
 
-                    <DialogFooter className="mt-4">
-                        {buttons.map((button) =>
-                            button.key === "cancel" ? (
-                                <DialogClose asChild key={button.key}>
-                                    <Button
-                                        type="button"
-                                        variant={button.variant}
-                                        className={button.className}
-                                    >
-                                        {button.label}
-                                    </Button>
-                                </DialogClose>
-                            ) : (
-                                mode !== "view" && (
-                                    <Button
-                                        type="submit"
-                                        key={button.key}
-                                        variant={button.variant}
-                                        className={button.className}
-                                        disabled={isSubmitting}
-                                    >
-                                        {isSubmitting
-                                            ? "Saving..."
-                                            : button.label}
-                                    </Button>
+                        {/* Footer Buttons (Inside Form Now ✅) */}
+                        <div className="p-6 border-t flex justify-end gap-2">
+                            {buttons.map((button) =>
+                                button.key === "cancel" ? (
+                                    <DialogClose asChild key={button.key}>
+                                        <Button
+                                            type="button"
+                                            variant={button.variant}
+                                            className={button.className}
+                                        >
+                                            {button.label}
+                                        </Button>
+                                    </DialogClose>
+                                ) : (
+                                    mode !== "view" && (
+                                        <Button
+                                            type="submit"
+                                            key={button.key}
+                                            variant={button.variant}
+                                            className={button.className}
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting
+                                                ? "Saving..."
+                                                : button.label}
+                                        </Button>
+                                    )
                                 )
-                            )
-                        )}
-                    </DialogFooter>
-                </form>
+                            )}
+                        </div>
+                    </form>
+                </div>
             </DialogContent>
         </Dialog>
     );

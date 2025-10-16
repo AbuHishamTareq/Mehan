@@ -477,9 +477,9 @@ const Departments = () => {
             console.log(response);
 
             // Show success message with statistics
-            let message = `Import completed! ${response.imported_count} users imported successfully.`;
+            let message = `Import completed! ${response.imported_count} departments imported successfully.`;
             if (response.skipped_count > 0) {
-                message += ` ${response.skipped_count} users were skipped.`;
+                message += ` ${response.skipped_count} departments were skipped.`;
             }
 
             toast({
