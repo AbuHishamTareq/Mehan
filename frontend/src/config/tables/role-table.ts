@@ -31,14 +31,14 @@ export const RoleTableConfig = {
         {
             label: "View",
             icon: "Eye" as keyof typeof LucidIcons,
-            tooltip: "View",
+            tooltip: "view",
             className:
                 "w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500 hover:bg-blue-600 text-white",
         },
         {
             label: "Edit",
             icon: "Edit" as keyof typeof LucidIcons,
-            tooltip: "Edit",
+            tooltip: "edit",
             className:
                 "w-8 h-8 flex items-center justify-center rounded-lg bg-amber-500 hover:bg-amber-600 text-white",
         },

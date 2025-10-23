@@ -6,6 +6,7 @@ use App\Imports\DepartmentsImport;
 use App\Models\Department;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -23,7 +24,19 @@ class DepartmentController extends Controller
 
         $perPage = $request->query('perPage', 10);
 
-        $departments = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        if ($perPage == -1) {
+            $allDepartments = $query->orderBy("created_at", "DESC")->get();
+
+            $departments = new LengthAwarePaginator(
+                $allDepartments,
+                $allDepartments->count(),
+                $allDepartments->count(),
+                1, // current page
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        } else {
+            $departments = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        }
 
         $departments = $departments->through(function ($department) {
             return [

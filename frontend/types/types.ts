@@ -9,6 +9,10 @@ import type {
 // Language Context Types
 export type Language = "en" | "ar";
 
+// Auth Context Type
+type Role = string;
+type Permission = string;
+
 export interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
@@ -21,10 +25,15 @@ export type User = {
     id: number;
     name: string;
     email: string;
+    roles: string[];
+    permissions: string[];
 };
 
 export type AuthContextType = {
     user: User | null;
+    initAuth: () => Promise<void>;
+    can: (permission: Permission | Permission[]) => boolean;
+    hasRole: (role: Role | Role[]) => boolean;
     login: (
         email: string,
         password: string,
@@ -33,6 +42,18 @@ export type AuthContextType = {
     ) => Promise<void>;
     logout: () => Promise<void>;
     loading: boolean;
+};
+
+// CUSTOM MENU
+export type MenuItem = {
+    id: string;
+    title: string;
+    url?: string | undefined;
+    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+    children?: MenuItem[];
+    role?: string | undefined;
+    permission?: string | undefined;
+    iconColor?: string;
 };
 
 // CUSTOM TABLE
@@ -60,6 +81,7 @@ interface TableAction {
     icon: keyof typeof LucidIcons;
     tooltip: string;
     className?: string;
+    isRTL?: boolean;
 }
 
 export interface TableActionButtonsProps {
@@ -70,6 +92,11 @@ export interface TableActionButtonsProps {
     onEdit?: (row: TableRow) => void;
     onDelete?: (id: number) => void;
     onRestore?: (id: number) => void;
+    canEdit?: boolean;
+    canDelete?: boolean;
+    canRestore?: boolean;
+    canView?: boolean;
+    isRTL?: boolean;
 }
 
 export interface CustomTableProps {
@@ -86,6 +113,11 @@ export interface CustomTableProps {
     selectedRows?: number[];
     onSelectionChange?: (selectedIds: number[]) => void;
     onStatusToggle?: (id: number, is_active: boolean) => void;
+    canEdit?: boolean;
+    canDelete?: boolean;
+    canRestore?: boolean;
+    canView?: boolean;
+    canActivateDeactivate?: boolean;
 }
 
 // CUSTOM FORM
@@ -130,7 +162,15 @@ interface FormFields {
     key: string;
     name: string;
     label: string;
-    type: "text" | "select" | "radio" | "textarea" | "checkbox" | undefined;
+    type:
+        | "text"
+        | "select"
+        | "radio"
+        | "textarea"
+        | "checkbox"
+        | "password"
+        | "tel"
+        | undefined;
     tabIndex?: number;
     autofocus?: boolean;
     placeholder?: string;
@@ -146,7 +186,7 @@ interface ExtraData {
 export interface CustomModelFormProps<T extends FieldValues> {
     title: string;
     description: string;
-    addButton: AddButtonProps;
+    addButton?: AddButtonProps;
     fields: FormFields[];
     buttons: ButtonProps[];
     register: UseFormRegister<T>;
@@ -182,6 +222,7 @@ export interface LinkProps {
     label: string;
     active: boolean;
     page: number | null;
+    type: string;
 }
 
 //ROLES INTERFACE
@@ -211,6 +252,25 @@ export interface DesignationProps extends TableRow {
     department_id: number;
     department: string;
     is_active?: boolean;
+    removed_at: Date | null;
+    removed: string;
+}
+
+// USERS INTERFACE
+export interface UserProps extends TableRow {
+    id?: number;
+    uuid?: string;
+    name: string;
+    email: string;
+    password: string;
+    department_id: number;
+    department: string;
+    designation_id: number;
+    designation: string;
+    mobile_number?: string;
+    confirm_password?: string;
+    is_active?: boolean;
+    roles?: string[];
     removed_at: Date | null;
     removed: string;
 }

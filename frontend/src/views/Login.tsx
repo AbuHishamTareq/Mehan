@@ -26,7 +26,7 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
     const { t, language, isRTL } = useLanguage();
-    const { login } = useAuth();
+    const { login, initAuth } = useAuth();
     const navigate = useNavigate();
     const font = isRTL ? "font-arabic" : "font-english";
 
@@ -51,6 +51,7 @@ const Login = () => {
         // Simulate API call
         try {
             await login(email, password, rememberMe, language);
+            await initAuth();
             toast({
                 title: t("successLoginTitle"),
                 description: t("succesLogin"),

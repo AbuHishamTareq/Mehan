@@ -19,6 +19,8 @@ import { generateAndDownloadFile } from "../../lib/generateAndDownloadFile";
 import { Button } from "../../components/ui/button";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { hasPermission } from "../../lib/authorization";
+import { useAuth } from "../../hooks/useAuth";
 
 interface DepartmentFormValue {
     en_name: string;
@@ -48,6 +50,7 @@ const Departments = () => {
     const { t, isRTL } = useLanguage();
     const font = isRTL ? "font-arabic" : "font-english";
     const { toast } = useToast();
+    const { user } = useAuth();
 
     const [modelOpen, setModelOpen] = useState(false);
     const [departments, setDepartments] = useState<DepartmentIndexProps>({
@@ -67,6 +70,20 @@ const Departments = () => {
 
     // Persist current perPage in state
     const [currentPerPage, setCurrentPerPage] = useState(10);
+
+    const userPermissions = user?.permissions || [];
+    const canAdd = hasPermission(`create_role`, userPermissions);
+    // const canPrint = hasPermission(`print-domain`, userPermissions);
+    const canExport = hasPermission(`export_department`, userPermissions);
+    const canImport = hasPermission(`import_department`, userPermissions);
+    const canActivateDeactivate = hasPermission(
+        `active_deactive_department`,
+        userPermissions
+    );
+    const canEdit = hasPermission(`edit_department`, userPermissions);
+    const canDelete = hasPermission(`delete_department`, userPermissions);
+    const canView = hasPermission(`view_department`, userPermissions);
+    const canRestore = hasPermission(`restore_department`, userPermissions);
 
     const defaultFormValues: DepartmentFormValue = {
         en_name: "",
@@ -138,10 +155,41 @@ const Departments = () => {
         return () => clearTimeout(timer);
     }, [searchValue, currentPerPage, fetchDepartmentData]);
 
+    // TRANSLATE MODEL FORM
+    const translatedConfig = {
+        ...DepartmentModelFormConfig,
+        moduleTitle: t("manageDepartments"),
+        title: t("addNewDepartment"),
+        description: t("departmentDescription"),
+        addButton: {
+            ...DepartmentModelFormConfig.addButton,
+            label: t("addNewDepartment"),
+            className: `${DepartmentModelFormConfig.addButton.className} ${font}`,
+        },
+        fields: DepartmentModelFormConfig.fields.map((field) => ({
+            ...field,
+            label: t(field.key),
+            placeholder: t(field.key + "Placeholder"),
+            className: `${field.className ?? ""} ${font}`,
+        })),
+        buttons: DepartmentModelFormConfig.buttons.map((btn) => ({
+            ...btn,
+            label: t(btn.key === "cancel" ? "cancel" : "saveChanges"),
+        })),
+    };
+
+    // TRANSLATE TABLES HEADERS
     const columns = DepartmentTableConfig.columns.map((col) => ({
         ...col,
         label: t(col.label),
         className: `${col.className} ${font}`,
+    }));
+
+    // TRANSLATE TOOLTIP FOR ACTION BUTTONS
+    const actions = DepartmentTableConfig.actions.map((action) => ({
+        ...action,
+        label: t(action.label),
+        tooltip: t(action.tooltip),
     }));
 
     const onSubmit = async (data: DepartmentFormValue) => {
@@ -474,8 +522,6 @@ const Departments = () => {
                 formData
             );
 
-            console.log(response);
-
             // Show success message with statistics
             let message = `Import completed! ${response.imported_count} departments imported successfully.`;
             if (response.skipped_count > 0) {
@@ -487,6 +533,8 @@ const Departments = () => {
                 description: message,
                 variant: "success",
             });
+
+            setIsImportOpen(false);
 
             // Show warnings if any
             if (response.warnings && response.warnings.length > 0) {
@@ -536,7 +584,7 @@ const Departments = () => {
                         onSuccess={() =>
                             fetchDepartmentData(searchValue, currentPerPage)
                         }
-                        title="department"
+                        title={isRTL ? "القسم" : "department"}
                         exportAllCsvFn={handleExportAllCSV}
                         exportCurrentPageCsv={handleCurrentPageExportCSV}
                         exportSelectedRowsCsv={handleExportSelectedCSV}
@@ -547,8 +595,10 @@ const Departments = () => {
                         exportCurrentPagePdf={handleCurrentPageExportPdf}
                         exportSelectedRowsPdf={handleExportSelectedPdf}
                         onToggleImport={() => setIsImportOpen((prev) => !prev)}
-                        isImportOpen={isImportOpen}
-                        showImportButton={true}
+                        isImportOpen={canImport ? isImportOpen : false}
+                        showImportButton={canImport ? true : false}
+                        canExport={canExport}
+                        canActivateDeactivate={canActivateDeactivate}
                     />
                 </div>
                 {/* Import Section - Show above search and add button */}
@@ -558,8 +608,10 @@ const Departments = () => {
                             <div className="flex items-center justify-between flex-wrap gap-4">
                                 <div className="flex items-center gap-2">
                                     <Upload className="w-5 h-5 text-green-600" />
-                                    <span className="font-medium text-green-800">
-                                        Import Departments
+                                    <span
+                                        className={`font-medium text-green-800 ${font}`}
+                                    >
+                                        {t("importDepartments")}
                                     </span>
                                 </div>
 
@@ -569,10 +621,10 @@ const Departments = () => {
                                         variant="outline"
                                         size="sm"
                                         onClick={handleDownloadTemplate}
-                                        className="flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50 hover:text-black"
+                                        className={`flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50 hover:text-black ${font}`}
                                     >
                                         <FileText className="w-4 h-4" />
-                                        Download Template
+                                        {t("downloadTemplate")}
                                     </Button>
 
                                     {/* Import File */}
@@ -580,14 +632,14 @@ const Departments = () => {
                                         variant="outline"
                                         size="sm"
                                         asChild
-                                        className="border-green-300 text-green-700 hover:bg-green-50 hover:text-black"
+                                        className={`border-green-300 text-green-700 hover:bg-green-50 hover:text-black ${font}`}
                                         disabled={isImporting}
                                     >
                                         <label className="flex items-center gap-2 cursor-pointer">
                                             <Upload className="w-4 h-4" />
                                             {isImporting
-                                                ? "Importing..."
-                                                : "Import File"}
+                                                ? t("importing")
+                                                : t("importFile")}
                                             <input
                                                 type="file"
                                                 accept=".csv,.xlsx,.xls"
@@ -606,9 +658,10 @@ const Departments = () => {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="mt-2 text-sm text-green-600">
-                                Upload Excel file with columns: english name,
-                                arabic name
+                            <div
+                                className={`mt-2 text-sm text-green-600 ${font}`}
+                            >
+                                {t("deptImportNote")}
                             </div>
                         </div>
                     </div>
@@ -618,24 +671,38 @@ const Departments = () => {
                 <div className="flex items-center justify-between mb-2">
                     <div className="relative w-1/2">
                         <Input
-                            placeholder="Search Departments..."
-                            className="h-10 w-full pr-10 border border-blue-200"
+                            placeholder={t("searchDepartment")}
+                            className={`h-10 w-full border border-blue-200 ${font} ${
+                                isRTL ? "pl-10 pr-4" : "pr-10 pl-4"
+                            }`}
                             {...register("search")}
                         />
-                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                        <Search
+                            className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 ${
+                                isRTL ? "left-4 scale-x-[-1]" : "right-4"
+                            }`}
+                        />
                     </div>
                     <CustomModelForm
                         title={
                             mode === "view"
-                                ? "View Department"
+                                ? t("viewDepartment")
                                 : mode === "edit"
-                                ? "Edit Department"
-                                : DepartmentModelFormConfig.title
+                                ? t("editDepartment")
+                                : translatedConfig.title
                         }
-                        description={DepartmentModelFormConfig.description}
-                        addButton={DepartmentModelFormConfig.addButton}
-                        fields={DepartmentModelFormConfig.fields}
-                        buttons={DepartmentModelFormConfig.buttons}
+                        description={
+                            mode === "view"
+                                ? ""
+                                : mode === "edit"
+                                ? t("editDepartmentDesc")
+                                : translatedConfig.description
+                        }
+                        addButton={
+                            canAdd ? translatedConfig.addButton : undefined
+                        }
+                        fields={translatedConfig.fields}
+                        buttons={translatedConfig.buttons}
                         register={register}
                         errors={errors}
                         isSubmitting={formSubmitting}
@@ -650,7 +717,7 @@ const Departments = () => {
                 {/* Table */}
                 <CustomTable
                     columns={columns}
-                    actions={DepartmentTableConfig.actions}
+                    actions={actions}
                     data={departments.departments.data}
                     isLoading={pageLoading}
                     onView={(row) => openModel("view", row as DepartmentProps)}
@@ -663,6 +730,11 @@ const Departments = () => {
                     selectedRows={selectedRows}
                     onSelectionChange={handleSelectionChange}
                     onStatusToggle={(id, checked) => handleToggle(id, checked)}
+                    canEdit={canEdit}
+                    canDelete={canDelete}
+                    canRestore={canRestore}
+                    canView={canView}
+                    canActivateDeactivate={canActivateDeactivate}
                 />
 
                 {/* Pagination */}

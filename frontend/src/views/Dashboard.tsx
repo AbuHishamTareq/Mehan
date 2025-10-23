@@ -28,6 +28,9 @@ const Dashboard = () => {
     const { t, isRTL } = useLanguage();
     const font = isRTL ? "font-arabic" : "font-english";
 
+    // Helper for RTL-aware margins
+    const rtlMargin = (ltr: string, rtl: string) => (isRTL ? rtl : ltr);
+
     const stats = [
         {
             title: "Total Bookings",
@@ -127,8 +130,15 @@ const Dashboard = () => {
                                         <p className="text-2xl font-bold text-gray-900">
                                             {stat.value}
                                         </p>
-                                        <p className="text-sm text-green-600 flex items-center mt-1">
-                                            <TrendingUp className="w-4 h-4 mr-1" />
+                                        <p
+                                            className={`text-sm text-green-600 flex items-center mt-1`}
+                                        >
+                                            <TrendingUp
+                                                className={`w-4 h-4 ${rtlMargin(
+                                                    "mr-1",
+                                                    "ml-1"
+                                                )}`}
+                                            />
                                             {stat.change}
                                         </p>
                                     </div>
@@ -148,7 +158,12 @@ const Dashboard = () => {
                     <Card className="lg:col-span-2 animate-slide-in-right">
                         <CardHeader>
                             <CardTitle className="flex items-center">
-                                <Activity className="w-5 h-5 mr-2" />
+                                <Activity
+                                    className={`w-5 h-5 ${rtlMargin(
+                                        "mr-2",
+                                        "ml-2"
+                                    )}`}
+                                />
                                 Services Overview
                             </CardTitle>
                             <CardDescription>
@@ -166,7 +181,9 @@ const Dashboard = () => {
                                         }}
                                     >
                                         <div
-                                            className={`p-2 rounded-lg ${service.color} mr-3`}
+                                            className={`p-2 rounded-lg ${
+                                                service.color
+                                            } ${rtlMargin("mr-3", "ml-3")}`}
                                         >
                                             <service.icon className="w-5 h-5 text-white" />
                                         </div>
@@ -201,7 +218,12 @@ const Dashboard = () => {
                     >
                         <CardHeader>
                             <CardTitle className="flex items-center">
-                                <Clock className="w-5 h-5 mr-2" />
+                                <Clock
+                                    className={`w-5 h-5 ${rtlMargin(
+                                        "mr-2",
+                                        "ml-2"
+                                    )}`}
+                                />
                                 Recent Bookings
                             </CardTitle>
                             <CardDescription>
@@ -270,21 +292,21 @@ const Dashboard = () => {
                                 onClick={() => <Navigate to={"/staff"} />}
                                 className="h-20 bg-blue-500 hover:bg-blue-600 text-white flex flex-col items-center justify-center space-y-2 hover:scale-105 transition-all duration-300"
                             >
-                                <UserCheck className="w-6 h-6" />
+                                <UserCheck className={`w-6 h-6`} />
                                 <span>Manage Staff</span>
                             </Button>
                             <Button
                                 onClick={() => <Navigate to={"/bookings"} />}
                                 className="h-20 bg-green-500 hover:bg-green-600 text-white flex flex-col items-center justify-center space-y-2 hover:scale-105 transition-all duration-300"
                             >
-                                <Calendar className="w-6 h-6" />
+                                <Calendar className={`w-6 h-6`} />
                                 <span>New Booking</span>
                             </Button>
                             <Button
                                 onClick={() => <Navigate to={"/services"} />}
                                 className="h-20 bg-purple-500 hover:bg-purple-600 text-white flex flex-col items-center justify-center space-y-2 hover:scale-105 transition-all duration-300"
                             >
-                                <Briefcase className="w-6 h-6" />
+                                <Briefcase className={`w-6 h-6`} />
                                 <span>Service Settings</span>
                             </Button>
                         </div>

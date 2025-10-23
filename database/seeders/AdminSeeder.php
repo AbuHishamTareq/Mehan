@@ -30,9 +30,10 @@ class AdminSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => Hash::make('M3h@n@2025'), // change to secure password
             'remember_token' => Str::random(10),
+            'department_id' => 1,
+            'designation_id' => 1,
+            'mobile_number' => '0551977904',
             'created_at' => now(),
-            'updated_at' => now(),
-            // 'role' => 'admin', // if you have a role column
         ]);
     }
 }

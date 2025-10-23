@@ -12,81 +12,118 @@ export const TableActionButtons = ({
     onEdit,
     onDelete,
     onRestore,
+    canEdit,
+    canDelete,
+    canRestore,
+    canView,
+    isRTL,
 }: TableActionButtonsProps) => {
     return (
-        <div className="flex space-x-2">
+        <div
+            className={`flex ${
+                isRTL ? "space-x-reverse space-x-2" : "space-x-2"
+            }`}
+        >
             {actions.map((action, index) => {
                 const IconComponent = LucidIcons[
                     action.icon as keyof typeof LucidIcons
                 ] as React.ElementType;
 
+                const marginClass =
+                    index !== actions.length - 1
+                        ? isRTL
+                            ? "mr-4"
+                            : "ml-4"
+                        : "";
+
                 // DELETE
+
                 if (action.label === "Delete") {
                     return (
-                        <Tooltip key={`delete-${row.id}-${index}`}>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    className={action.className}
-                                    onClick={() => onDelete?.(Number(row.id))}
-                                    disabled={!!row.removed_at}
-                                >
-                                    <IconComponent size={18} />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>{action.tooltip}</TooltipContent>
-                        </Tooltip>
+                        canDelete && (
+                            <Tooltip key={`delete-${row.id}-${index}`}>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        className={`${action.className} ${marginClass}`}
+                                        onClick={() =>
+                                            onDelete?.(Number(row.id))
+                                        }
+                                        disabled={!!row.removed_at}
+                                    >
+                                        <IconComponent size={18} />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {action.tooltip}
+                                </TooltipContent>
+                            </Tooltip>
+                        )
                     );
                 }
 
                 // RESTORE
                 if (action.label === "Restore") {
                     return (
-                        <Tooltip key={`restore-${row.id}-${index}`}>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    className={action.className}
-                                    onClick={() => onRestore?.(Number(row.id))}
-                                    disabled={!row.removed_at}
-                                >
-                                    <IconComponent size={18} />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>{action.tooltip}</TooltipContent>
-                        </Tooltip>
+                        canRestore && (
+                            <Tooltip key={`restore-${row.id}-${index}`}>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        className={`${action.className} ${marginClass}`}
+                                        onClick={() =>
+                                            onRestore?.(Number(row.id))
+                                        }
+                                        disabled={!row.removed_at}
+                                    >
+                                        <IconComponent size={18} />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {action.tooltip}
+                                </TooltipContent>
+                            </Tooltip>
+                        )
                     );
                 }
 
                 // VIEW
                 if (isModel && action.label === "View") {
                     return (
-                        <Tooltip key={`view-${row.id}-${index}`}>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    className={action.className}
-                                    onClick={() => onView?.(row)}
-                                >
-                                    <IconComponent size={18} />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>{action.tooltip}</TooltipContent>
-                        </Tooltip>
+                        canView && (
+                            <Tooltip key={`view-${row.id}-${index}`}>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        className={`${action.className} ${marginClass}`}
+                                        onClick={() => onView?.(row)}
+                                    >
+                                        <IconComponent size={18} />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {action.tooltip}
+                                </TooltipContent>
+                            </Tooltip>
+                        )
                     );
                 }
 
                 // EDIT
                 if (isModel && action.label === "Edit") {
                     return (
-                        <Tooltip key={`edit-${row.id}-${index}`}>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    className={action.className}
-                                    onClick={() => onEdit?.(row)}
-                                >
-                                    <IconComponent size={18} />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>{action.tooltip}</TooltipContent>
-                        </Tooltip>
+                        canEdit && (
+                            <Tooltip key={`edit-${row.id}-${index}`}>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        className={`${action.className} ${marginClass}`}
+                                        onClick={() => onEdit?.(row)}
+                                    >
+                                        <IconComponent size={18} />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {action.tooltip}
+                                </TooltipContent>
+                            </Tooltip>
+                        )
                     );
                 }
 

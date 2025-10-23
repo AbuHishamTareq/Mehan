@@ -6,6 +6,7 @@ use App\Models\Module;
 use App\Models\Permission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -27,7 +28,19 @@ class PermissionController extends Controller
 
         $perPage = $request->query("perPage", 10);
 
-        $permissions = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        if ($perPage == -1) {
+            $allPermissions = $query->orderBy("created_at", "DESC")->get();
+
+            $permissions = new LengthAwarePaginator(
+                $allPermissions,
+                $allPermissions->count(),
+                $allPermissions->count(),
+                1, // current page
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        } else {
+            $permissions = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        }
 
         $permissions = $permissions->through(function ($permission) {
             return [

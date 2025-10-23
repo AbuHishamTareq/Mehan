@@ -1,14 +1,14 @@
 import { CirclePlus } from "lucide-react";
 
 export const RoleModelFormConfig = {
-    moduleTitle: "Manage Roles",
-    title: "Add New Role",
-    description: "Fill in the details below to add a new role",
+    moduleTitle: "",
+    title: "",
+    description: "",
 
     // THIS FOR BUTTON IN THE TOP OF TABLE
     addButton: {
         id: "add-role",
-        label: "Add New Role",
+        label: "",
         className:
             "bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 cursor-pointer",
         icon: CirclePlus,
@@ -19,23 +19,23 @@ export const RoleModelFormConfig = {
     fields: [
         {
             id: "role",
-            key: "name",
+            key: "roleName",
             name: "label",
-            label: "Role (ex. Administrator):",
+            label: "",
             type: "text" as const,
-            placeholder: "Enter Role",
+            placeholder: "",
             tabindex: 1,
         },
         {
             id: "description",
-            key: "description",
+            key: "roleDescription",
             name: "description",
-            label: "Description:",
+            label: "",
             type: "textarea" as const,
             placeholder: "Enter role description",
             tabIndex: 2,
             rows: 3,
-            className: "rounded border p-2 w-full",
+            className: "p-2 w-full",
         },
         {
             id: "permissions",
@@ -52,7 +52,7 @@ export const RoleModelFormConfig = {
             key: "cancel",
             type: "button" as const,
             label: "Cancel",
-            variant: "ghost" as const,
+            variant: "destructive" as const,
             className: "cursor-pointer",
         },
         {

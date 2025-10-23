@@ -153,7 +153,13 @@ export default {
     },
     plugins: [
         animate,
-        function ({ addUtilities }) {
+        function ({
+            addUtilities,
+        }: {
+            addUtilities: (
+                utilities: Record<string, Record<string, string>>
+            ) => void;
+        }) {
             const newUtilities = {
                 ".space-x-reverse > * + *": {
                     "margin-left": "0",

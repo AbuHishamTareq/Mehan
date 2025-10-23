@@ -19,6 +19,8 @@ import { RoleModelFormConfig } from "../../config/forms/role-model-form";
 import { BulkAction } from "../../components/bulk-action";
 import { Search } from "lucide-react";
 import { generateAndDownloadFile } from "../../lib/generateAndDownloadFile";
+import { useAuth } from "../../hooks/useAuth";
+import { hasPermission } from "../../lib/authorization";
 
 interface RoleFormValue {
     label: string;
@@ -64,6 +66,7 @@ const PermissionsAndRoles = () => {
     const [selectedRole, setSelectedRole] = useState<RoleProps | null>(null);
     const [permissions, setPermissions] = useState<PermissionProps[]>([]);
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
+    const { user, initAuth } = useAuth();
 
     type ExportType = "csv" | "excel" | "pdf";
     type ExportScope = "all" | "current" | "selected";
@@ -78,6 +81,17 @@ const PermissionsAndRoles = () => {
         search: "",
         perPage: currentPerPage,
     };
+
+    const userPermissions = user?.permissions || [];
+    const canAdd = hasPermission(`create_role`, userPermissions);
+    // const canPrint = hasPermission(`print-domain`, userPermissions);
+    const canExport = hasPermission(`export_role`, userPermissions);
+    const canActivateDeactivate = hasPermission(
+        `active_deactive_role`,
+        userPermissions
+    );
+    const canEdit = hasPermission(`edit_role`, userPermissions);
+    const canView = hasPermission(`view_role`, userPermissions);
 
     const {
         register,
@@ -143,10 +157,41 @@ const PermissionsAndRoles = () => {
         return () => clearTimeout(timer);
     }, [searchValue, currentPerPage, fetchRoleData]);
 
+    // TRANSLATE MODEL FORM
+    const translatedConfig = {
+        ...RoleModelFormConfig,
+        moduleTitle: t("manageRoles"),
+        title: t("addNewRole"),
+        description: t("roleDesc"),
+        addButton: {
+            ...RoleModelFormConfig.addButton,
+            label: t("addNewRole"),
+            className: `${RoleModelFormConfig.addButton.className} ${font}`,
+        },
+        fields: RoleModelFormConfig.fields.map((field) => ({
+            ...field,
+            label: t(field.key),
+            placeholder: t(field.key + "Placeholder"),
+            className: `${field.className ?? ""} ${font}`,
+        })),
+        buttons: RoleModelFormConfig.buttons.map((btn) => ({
+            ...btn,
+            label: t(btn.key === "cancel" ? "cancel" : "saveChanges"),
+        })),
+    };
+
+    // TRANSLATE TABLES HEADERS
     const columns = RoleTableConfig.columns.map((col) => ({
         ...col,
         label: t(col.label),
         className: `${col.className} ${font}`,
+    }));
+
+    // TRANSLATE TOOLTIP FOR ACTION BUTTONS
+    const actions = RoleTableConfig.actions.map((action) => ({
+        ...action,
+        label: t(action.label),
+        tooltip: t(action.tooltip),
     }));
 
     const onSubmit = async (data: RoleFormValue) => {
@@ -172,7 +217,6 @@ const PermissionsAndRoles = () => {
                     className: font,
                 });
             } else {
-                console.log(payload);
                 const response = await RoleController.addRole(payload);
                 toast({
                     title: "Notification",
@@ -184,8 +228,8 @@ const PermissionsAndRoles = () => {
             }
             reset(defaultFormValues);
             closeModel();
-            // Always fetch with current perPage
             fetchRoleData(searchValue, currentPerPage);
+            initAuth();
         } catch (error) {
             console.error(error);
         } finally {
@@ -355,7 +399,7 @@ const PermissionsAndRoles = () => {
                         onSuccess={() =>
                             fetchRoleData(searchValue, currentPerPage)
                         }
-                        title="role"
+                        title={isRTL ? "الدور" : "role"}
                         exportAllCsvFn={handleExportAllCSV}
                         exportCurrentPageCsv={handleCurrentPageExportCSV}
                         exportSelectedRowsCsv={handleExportSelectedCSV}
@@ -366,6 +410,8 @@ const PermissionsAndRoles = () => {
                         exportCurrentPagePdf={handleCurrentPageExportPdf}
                         exportSelectedRowsPdf={handleExportSelectedPdf}
                         showImportButton={false}
+                        canExport={canExport}
+                        canActivateDeactivate={canActivateDeactivate}
                     />
                 </div>
 
@@ -373,24 +419,38 @@ const PermissionsAndRoles = () => {
                 <div className="flex items-center justify-between mb-2">
                     <div className="relative w-1/2">
                         <Input
-                            placeholder="Search Roles..."
-                            className="h-10 w-full pr-10 border border-blue-200"
+                            placeholder={t("searchRole")}
+                            className={`h-10 w-full border border-blue-200 ${font} ${
+                                isRTL ? "pl-10 pr-4" : "pr-10 pl-4"
+                            }`}
                             {...register("search")}
                         />
-                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                        <Search
+                            className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 ${
+                                isRTL ? "left-4 scale-x-[-1]" : "right-4"
+                            }`}
+                        />
                     </div>
                     <CustomModelForm
                         title={
                             mode === "view"
-                                ? "View Role"
+                                ? t("viewRole")
                                 : mode === "edit"
-                                ? "Edit Role"
-                                : RoleModelFormConfig.title
+                                ? t("editRole")
+                                : translatedConfig.title
                         }
-                        description={RoleModelFormConfig.description}
-                        addButton={RoleModelFormConfig.addButton}
-                        fields={RoleModelFormConfig.fields}
-                        buttons={RoleModelFormConfig.buttons}
+                        description={
+                            mode === "view"
+                                ? ""
+                                : mode === "edit"
+                                ? t("editRoleDesc")
+                                : translatedConfig.description
+                        }
+                        addButton={
+                            canAdd ? translatedConfig.addButton : undefined
+                        }
+                        fields={translatedConfig.fields}
+                        buttons={translatedConfig.buttons}
                         register={register}
                         errors={errors}
                         isSubmitting={formSubmitting}
@@ -406,7 +466,7 @@ const PermissionsAndRoles = () => {
                 {/* Table */}
                 <CustomTable
                     columns={columns}
-                    actions={RoleTableConfig.actions}
+                    actions={actions}
                     data={roles.roles.data}
                     isLoading={pageLoading}
                     onView={(row) => openModel("view", row as RoleProps)}
@@ -417,6 +477,9 @@ const PermissionsAndRoles = () => {
                     selectedRows={selectedRows}
                     onSelectionChange={handleSelectionChange}
                     onStatusToggle={(id, checked) => handleToggle(id, checked)}
+                    canEdit={canEdit}
+                    canView={canView}
+                    canActivateDeactivate={canActivateDeactivate}
                 />
 
                 {/* Pagination */}

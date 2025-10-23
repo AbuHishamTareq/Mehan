@@ -1,14 +1,14 @@
 import { CirclePlus } from "lucide-react";
 
 export const DepartmentModelFormConfig = {
-    moduleTitle: "Manage Departments",
-    title: "Add New Department",
-    description: "Fill in the details below to add a new department",
+    moduleTitle: "",
+    title: "",
+    description: "",
 
     // THIS FOR BUTTON IN THE TOP OF TABLE
     addButton: {
         id: "add-department",
-        label: "Add New Department",
+        label: "",
         className:
             "bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 cursor-pointer",
         icon: CirclePlus,
@@ -19,21 +19,23 @@ export const DepartmentModelFormConfig = {
     fields: [
         {
             id: "en_name",
-            key: "en_name",
+            key: "deptEnName",
             name: "en_name",
-            label: "English Department Name (ex. IT Department):",
+            label: "",
             type: "text" as const,
-            placeholder: "Enter English Department Name",
+            placeholder: "",
             tabindex: 1,
+            className: "",
         },
         {
             id: "ar_name",
-            key: "ar_name",
+            key: "deptArName",
             name: "ar_name",
-            label: "Arabic Department Name (ex. قسم تكنولوجيا المعلومات):",
+            label: "",
             type: "text" as const,
-            placeholder: "Arabic English Department Name",
+            placeholder: "",
             tabindex: 2,
+            className: "",
         },
     ],
     // FORM BUTTONS
@@ -41,14 +43,14 @@ export const DepartmentModelFormConfig = {
         {
             key: "cancel",
             type: "button" as const,
-            label: "Cancel",
-            variant: "ghost" as const,
+            label: "",
+            variant: "destructive" as const,
             className: "cursor-pointer",
         },
         {
             key: "submit",
             type: "submit" as const,
-            label: "Save Changes",
+            label: "",
             variant: "default" as const,
             className: "cursor-pointer",
         },

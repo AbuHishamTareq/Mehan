@@ -57,6 +57,8 @@ interface BulkActionProps<T extends TableRow> {
     onToggleImport?: () => void;
     isImportOpen?: boolean;
     showImportButton?: boolean;
+    canExport?: boolean;
+    canActivateDeactivate?: boolean;
 }
 
 export const BulkAction = <T extends TableRow>({
@@ -79,6 +81,8 @@ export const BulkAction = <T extends TableRow>({
     onToggleImport,
     isImportOpen,
     showImportButton,
+    canExport,
+    canActivateDeactivate,
 }: BulkActionProps<T>) => {
     const { t, isRTL } = useLanguage();
     const font = isRTL ? "font-arabic" : "font-english";
@@ -209,210 +213,270 @@ export const BulkAction = <T extends TableRow>({
             <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-2">
                     <Lock className="w-5 h-5 text-blue-600" />
-                    <span className="font-medium text-blue-800 capitalize">
-                        {selectedRows.length} {title}
-                        {selectedRows.length !== 1 ? "s" : ""} selected
+                    <span
+                        className={`font-medium text-blue-800 capitalize ${font}`}
+                    >
+                        {isRTL
+                            ? `${selectedRows.length} ${title} ${
+                                  selectedRows.length !== 1 ? "" : ""
+                              } ${t("selected")}`
+                            : `${selectedRows.length} ${title}${
+                                  selectedRows.length !== 1 ? "s" : ""
+                              } ${t("selected")}`}
                     </span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                     {/* Bulk Activate/Deactivate */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl"
+                    {canActivateDeactivate && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className={`flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl ${font}`}
+                                >
+                                    <UserCheck className="w-4 h-4" />
+                                    {t("statusAction")}
+                                    <ChevronDown className="w-4 h-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                className="w-48 sm:w-56 bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden z-50"
+                                sideOffset={8}
+                                align="end"
                             >
-                                <UserCheck className="w-4 h-4" />
-                                Status Actions
-                                <ChevronDown className="w-4 h-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            className="w-48 sm:w-56 bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden z-50"
-                            sideOffset={8}
-                            align="end"
-                        >
-                            <DropdownMenuItem
-                                className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
                hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-150"
-                                onClick={handleBulkActivate}
-                            >
-                                <UserCheck className="w-4 h-4 text-green-600" />
-                                <span>Activate Selected</span>
-                            </DropdownMenuItem>
+                                    onClick={handleBulkActivate}
+                                >
+                                    <UserCheck className="w-4 h-4 text-green-600" />
+                                    <span className={font}>
+                                        {t("activateSelected")}
+                                    </span>
+                                </DropdownMenuItem>
 
-                            <DropdownMenuItem
-                                className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base cursor-pointer 
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base cursor-pointer 
                hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
-                                onClick={handleBulkDeactivate}
-                            >
-                                <Lock className="w-4 h-4 text-red-600" />
-                                <span>Deactivate Selected</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                                    onClick={handleBulkDeactivate}
+                                >
+                                    <Lock className="w-4 h-4 text-red-600" />
+                                    <span className={font}>
+                                        {t("deactivateSelected")}
+                                    </span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
 
                     {/* Export Options */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl"
-                            >
-                                <Download className="w-4 h-4" />
-                                <span>Export Actions</span>
-                                <ChevronDown className="w-4 h-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuSub>
-                                <DropdownMenuSubTrigger
-                                    className="group flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer
+                    {canExport && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className={`flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl ${font}`}
+                                >
+                                    <Download className="w-4 h-4" />
+                                    <span>{t("exportActions")}</span>
+                                    <ChevronDown className="w-4 h-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger
+                                        className="group flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer
                                                 bg-white text-gray-800 rounded-md
                                                 data-[highlighted]:bg-indigo-100 data-[highlighted]:text-indigo-800
                                                 data-[state=open]:bg-indigo-100 data-[state=open]:text-indigo-800
                                                 hover:bg-indigo-100 hover:text-indigo-800 transition-colors duration-150"
-                                >
-                                    <FileText className="w-4 h-4 text-sky-600" />
-                                    <span>Export to CSV</span>
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
-               hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150"
-                                        onClick={exportAllCsvFn}
                                     >
-                                        <Layers className="w-4 h-4 text-blue-500" />
-                                        All Pages
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
-               hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150"
-                                        onClick={exportCurrentPageCsv}
-                                    >
-                                        <Target className="w-4 h-4 text-amber-500" />
-                                        Current Page
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
-               hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150"
-                                        onClick={exportSelectedRowsCsv}
-                                    >
-                                        <ListChecks className="w-4 h-4 text-purple-500" />
-                                        Selected{" "}
-                                        <span className="capitalize">
-                                            {title}
-                                            {selectedRows.length !== 1
-                                                ? "s"
-                                                : ""}
+                                        <FileText className="w-4 h-4 text-sky-600" />
+                                        <span className={font}>
+                                            {t("exportCsv")}
                                         </span>
-                                    </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                            </DropdownMenuSub>
-                            <DropdownMenuSub>
-                                <DropdownMenuSubTrigger
-                                    className="group flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent>
+                                        <DropdownMenuItem
+                                            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+               hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150"
+                                            onClick={exportAllCsvFn}
+                                        >
+                                            <Layers className="w-4 h-4 text-blue-500" />
+                                            <span className={font}>
+                                                {t("allPages")}
+                                            </span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+               hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150"
+                                            onClick={exportCurrentPageCsv}
+                                        >
+                                            <Target className="w-4 h-4 text-amber-500" />
+                                            <span className={font}>
+                                                {t("currentPage")}
+                                            </span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+               hover:bg-sky-50 hover:text-sky-700 transition-colors duration-150"
+                                            onClick={exportSelectedRowsCsv}
+                                        >
+                                            <ListChecks className="w-4 h-4 text-purple-500" />
+                                            <span
+                                                className={`capitalize ${font}`}
+                                            >
+                                                {isRTL
+                                                    ? `${title} ${t(
+                                                          "selected"
+                                                      )}`
+                                                    : `${t(
+                                                          "selected"
+                                                      )} ${title}${
+                                                          selectedRows.length !==
+                                                          1
+                                                              ? "s"
+                                                              : ""
+                                                      }`}
+                                            </span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger
+                                        className="group flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer
                                                 bg-white text-gray-800 rounded-md
                                                 data-[highlighted]:bg-indigo-100 data-[highlighted]:text-indigo-800
                                                 data-[state=open]:bg-indigo-100 data-[state=open]:text-indigo-800
                                                 hover:bg-indigo-100 hover:text-indigo-800 transition-colors duration-150"
-                                >
-                                    <FileSpreadsheet className="w-4 h-4 text-green-600" />
-                                    Export to Excel
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
-               hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
-                                        onClick={exportAllExcelFn}
                                     >
-                                        <Layers className="w-4 h-4 text-blue-500" />
-                                        All Pages
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
-               hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
-                                        onClick={exportCurrentPageExcel}
-                                    >
-                                        <Target className="w-4 h-4 text-amber-500" />
-                                        Current Page
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
-               hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
-                                        onClick={exportSelectedRowsExcel}
-                                    >
-                                        <ListChecks className="w-4 h-4 text-purple-500" />
-                                        Selected{" "}
-                                        <span className="capitalize">
-                                            {title}
-                                            {selectedRows.length !== 1
-                                                ? "s"
-                                                : ""}
+                                        <FileSpreadsheet className="w-4 h-4 text-green-600" />
+                                        <span className={font}>
+                                            {t("exportExcel")}
                                         </span>
-                                    </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                            </DropdownMenuSub>
-                            <DropdownMenuSub>
-                                <DropdownMenuSubTrigger
-                                    className="group flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent>
+                                        <DropdownMenuItem
+                                            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+               hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+                                            onClick={exportAllExcelFn}
+                                        >
+                                            <Layers className="w-4 h-4 text-blue-500" />
+                                            <span className={font}>
+                                                {t("all")}
+                                            </span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+               hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+                                            onClick={exportCurrentPageExcel}
+                                        >
+                                            <Target className="w-4 h-4 text-amber-500" />
+                                            <span className={font}>
+                                                {t("currentPage")}
+                                            </span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+               hover:bg-green-50 hover:text-green-700 transition-colors duration-150"
+                                            onClick={exportSelectedRowsExcel}
+                                        >
+                                            <ListChecks className="w-4 h-4 text-purple-500" />
+                                            <span
+                                                className={`capitalize ${font}`}
+                                            >
+                                                {isRTL
+                                                    ? `${title} ${t(
+                                                          "selected"
+                                                      )}`
+                                                    : `${t(
+                                                          "selected"
+                                                      )} ${title}${
+                                                          selectedRows.length !==
+                                                          1
+                                                              ? "s"
+                                                              : ""
+                                                      }`}
+                                            </span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger
+                                        className="group flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer
                                                 bg-white text-gray-800 rounded-md
                                                 data-[highlighted]:bg-indigo-100 data-[highlighted]:text-indigo-800
                                                 data-[state=open]:bg-indigo-100 data-[state=open]:text-indigo-800
                                                 hover:bg-indigo-100 hover:text-indigo-800 transition-colors duration-150"
-                                >
-                                    <File className="w-4 h-4 text-red-600" />
-                                    Export to PDF
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
-               hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
-                                        onClick={exportAllPdfFn}
                                     >
-                                        <Layers className="w-4 h-4 text-blue-500" />
-                                        All Pages
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
-               hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
-                                        onClick={exportCurrentPagePdf}
-                                    >
-                                        <Target className="w-4 h-4 text-amber-500" />
-                                        Current Page
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
-               hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
-                                        onClick={exportSelectedRowsPdf}
-                                    >
-                                        <ListChecks className="w-4 h-4 text-purple-500" />
-                                        Selected{" "}
-                                        <span className="capitalize">
-                                            {title}
-                                            {selectedRows.length !== 1
-                                                ? "s"
-                                                : ""}
+                                        <File className="w-4 h-4 text-red-600" />
+                                        <span className={font}>
+                                            {t("exportPdf")}
                                         </span>
-                                    </DropdownMenuItem>
-                                </DropdownMenuSubContent>
-                            </DropdownMenuSub>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent>
+                                        <DropdownMenuItem
+                                            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+               hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
+                                            onClick={exportAllPdfFn}
+                                        >
+                                            <Layers className="w-4 h-4 text-blue-500" />
+                                            <span className={font}>
+                                                {t("all")}
+                                            </span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+               hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
+                                            onClick={exportCurrentPagePdf}
+                                        >
+                                            <Target className="w-4 h-4 text-amber-500" />
+                                            <span className={font}>
+                                                {t("currentPage")}
+                                            </span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base cursor-pointer 
+               hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
+                                            onClick={exportSelectedRowsPdf}
+                                        >
+                                            <ListChecks className="w-4 h-4 text-purple-500" />
+                                            <span
+                                                className={`capitalize ${font}`}
+                                            >
+                                                {isRTL
+                                                    ? `${title} ${t(
+                                                          "selected"
+                                                      )}`
+                                                    : `${t(
+                                                          "selected"
+                                                      )} ${title}${
+                                                          selectedRows.length !==
+                                                          1
+                                                              ? "s"
+                                                              : ""
+                                                      }`}
+                                            </span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
 
                     {showImportButton && (
                         <Button
                             size="sm"
                             variant="outline"
                             onClick={onToggleImport}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl"
+                            className={`bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl ${font}`}
                         >
                             <Upload className="w-4 h-4" />
                             {isImportOpen
-                                ? "Close Import Dialog"
-                                : "Open Import Dialog"}
+                                ? t("closeImportDialog")
+                                : t("openImportDialog")}
                         </Button>
                     )}
 
@@ -420,9 +484,9 @@ export const BulkAction = <T extends TableRow>({
                         variant="ghost"
                         size="sm"
                         onClick={() => onClearSelection()}
-                        className="text-gray-600 hover:text-white"
+                        className={`text-gray-600 hover:text-white ${font}`}
                     >
-                        Clear Selection
+                        {t("clear")}
                     </Button>
                 </div>
             </div>

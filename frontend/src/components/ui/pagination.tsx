@@ -1,4 +1,5 @@
 import type { LinkProps } from "../../../types/types";
+import { useLanguage } from "../../hooks/useLanguage";
 import { Button } from "./button";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./select";
 
@@ -22,39 +23,70 @@ export const Pagination = ({
     onPerPageChange,
     onPageChange,
 }: PaginationProps) => {
+    const { t, isRTL } = useLanguage();
+    const font = isRTL ? "font-arabic" : "font-english";
+
+    const getLinkLabel = (link: LinkProps) => {
+        if (link.type === "next" || /Next|»/i.test(link.label)) {
+            return t("next");
+        }
+        if (link.type === "previous" || /Previous|«/i.test(link.label)) {
+            return t("previous");
+        }
+        return link.label; // page number
+    };
+
     return (
         <div className="flex justify-between items-center mt-4">
-            <p className="text-sm text-black">
-                Showing <strong>{paginateData.from}</strong> to{" "}
-                <strong>{paginateData.to}</strong> of{" "}
-                <strong>{paginateData.total}</strong> entries
+            {/* Showing X to Y of Z entries */}
+            <p className={`text-sm text-black ${font}`}>
+                {t("showing")} <strong>{paginateData.from}</strong> {t("to")}{" "}
+                <strong>{paginateData.to}</strong> {t("of")}{" "}
+                <strong>{paginateData.total}</strong> {t("entries")}
             </p>
 
-            <div className="flex items-center space-x-4">
-                <span className="text-sm text-black">Row per page:</span>
+            {/* Per page selector */}
+            <div className="flex items-center">
+                <span
+                    className={`text-sm text-black ${font} ${
+                        isRTL ? "mr-2" : "ml-2"
+                    }`}
+                >
+                    {t("rowPerPage")}:
+                </span>
                 <Select
                     onValueChange={onPerPageChange}
                     value={perPage?.toString() || "10"}
                 >
-                    <SelectTrigger className="w-[120px] h-8">
-                        <span className="block truncate">
-                            Entries: {perPage === -1 ? "All" : perPage}
+                    <SelectTrigger className="w-[80px] h-8">
+                        <span className={`block truncate ${font}`}>
+                            {perPage === -1 ? t("all") : perPage}
                         </span>
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="10">10</SelectItem>
-                        <SelectItem value="25">25</SelectItem>
-                        <SelectItem value="50">50</SelectItem>
-                        <SelectItem value="100">100</SelectItem>
-                        <SelectItem value="-1">All</SelectItem>
+                        {[10, 25, 50, 100].map((n) => (
+                            <SelectItem
+                                key={n}
+                                value={n.toString()}
+                                className={font}
+                            >
+                                {n}
+                            </SelectItem>
+                        ))}
+                        <SelectItem value="-1" className={font}>
+                            {t("all")}
+                        </SelectItem>
                     </SelectContent>
                 </Select>
             </div>
 
-            <div className="flex space-x-2">
+            {/* Pagination buttons */}
+            <div className={`flex ${isRTL ? "flex-row-reverse" : ""} gap-2`}>
                 {paginateData.links.map((link, index) => {
                     const pageNumber = link.page;
                     const isDisabled = !pageNumber;
+
+                    const label = getLinkLabel(link);
 
                     return (
                         <Button
@@ -65,16 +97,16 @@ export const Pagination = ({
                             className={`px-3 py-2 h-8 rounded-md ${
                                 isDisabled
                                     ? "text-gray-400 bg-gray-200 cursor-not-allowed"
-                                    : link.label.includes("Next") ||
-                                      link.label.includes("Previous")
+                                    : /next|previous/i.test(label)
                                     ? "bg-indigo-600 text-white hover:bg-indigo-300" // Next/Prev style
                                     : link.active
                                     ? "bg-indigo-600 text-white hover:bg-indigo-700" // Active page
                                     : "bg-indigo-100 text-black hover:bg-indigo-100" // Normal page
-                            }`}
+                            } ${font}`}
                             disabled={isDisabled}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
+                        >
+                            {label}
+                        </Button>
                     );
                 })}
             </div>

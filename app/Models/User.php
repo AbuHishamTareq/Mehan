@@ -3,7 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Traits\BlameableSoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -13,24 +16,32 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, SoftDeletes, BlameableSoftDeletes;
+
+    protected $table = "users";
+
+    protected $guard_name = 'sanctum';
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are mass assignab    le.
      *
      * @var list<string>
      */
+
     protected $fillable = [
         "name",
         "email",
         "password",
         "mobile_number",
-        "status",
+        "is_active",
         "uuid",
         "department_id",
-        "desgnation_id",
+        "designation_id",
         "created_by",
         "updated_by",
+        'removed_by',
+        'restored_by',
+        'removed_at',
     ];
 
     /**
@@ -42,6 +53,9 @@ class User extends Authenticatable
         "password",
         "remember_token",
     ];
+
+    protected $dates = ['removed_at'];
+    const DELETED_AT = 'removed_at';
 
     /**
      * Get the attributes that should be cast.

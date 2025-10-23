@@ -6,6 +6,7 @@ use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,11 +23,14 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
             return response()->json(null, 200);
         }
 
+        $user->load('roles', 'permissions');
+
         return response()->json([
             "id"    => $user->id,
             "name"  => $user->name,
             "email" => $user->email,
-            // "role"  => $user->role ?? null,
+            "roles" => $user->getRoleNames(),
+            "permissions" => $user->getAllPermissions()->pluck('name'),
         ]);
     });
 
@@ -83,6 +87,19 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
         Route::delete("/destroy/{id}", [DesignationController::class, "destroy"])->name("setting.designations.destroy");
         Route::patch("/restore/{id}", [DesignationController::class, "restore"])->name("setting.designations.restore");
         Route::post('/import', [DesignationController::class, 'import'])->name('setting.designations.import');
+    });
+
+    // Settings/Users APIs
+    Route::prefix("users")->group(function () {
+        Route::get("/index", [UserController::class, "index"])->name("setting.users.index");
+        Route::post("/store", [UserController::class, "store"])->name("setting.users.store");
+        Route::put("/update/{id}", [UserController::class, "update"])->name("setting.users.update");
+        Route::put("/bulkActivate", [UserController::class, "bulkActivate"])->name("setting.users.bulkActivate");
+        Route::put("/bulkDeactivate", [UserController::class, "bulkDeactivate"])->name("setting.users.bulkDeactivate");
+        Route::put("/activeDeactivate", [UserController::class, "activeDeactivate"])->name("setting.users.activeDeactivate");
+        Route::delete("/destroy/{id}", [UserController::class, "destroy"])->name("setting.users.destroy");
+        Route::patch("/restore/{id}", [UserController::class, "restore"])->name("setting.users.restore");
+        Route::post('/import', [UserController::class, 'import'])->name('setting.users.import');
     });
 
     // Logout APIs

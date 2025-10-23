@@ -6,6 +6,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -22,7 +23,19 @@ class RoleController extends Controller
 
         $perPage = $request->query("perPage", 10);
 
-        $roles = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        if ($perPage == -1) {
+            $allRoles = $query->orderBy("created_at", "DESC")->get();
+
+            $roles = new LengthAwarePaginator(
+                $allRoles,
+                $allRoles->count(),
+                $allRoles->count(),
+                1, // current page
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        } else {
+            $roles = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        }
 
         $permissions = Permission::with("module")->get()->groupBy("module.label")->map(function ($permissions) {
             return $permissions->map(function ($permission) {

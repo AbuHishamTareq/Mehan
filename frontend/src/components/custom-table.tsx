@@ -20,6 +20,11 @@ export const CustomTable = ({
     selectedRows = [],
     onSelectionChange = () => {},
     onStatusToggle,
+    canEdit,
+    canDelete,
+    canRestore,
+    canView,
+    canActivateDeactivate,
 }: CustomTableProps & { isLoading?: boolean }) => {
     const { t, isRTL } = useLanguage();
     const font = isRTL ? "font-arabic" : "font-english";
@@ -28,9 +33,7 @@ export const CustomTable = ({
     const handleRowSelect = (rowId: number, checked: boolean) => {
         let newSelection = [...selectedRows];
         if (checked) {
-            if (!newSelection.includes(rowId)) {
-                newSelection.push(rowId);
-            }
+            if (!newSelection.includes(rowId)) newSelection.push(rowId);
         } else {
             newSelection = newSelection.filter((id) => id !== rowId);
         }
@@ -88,9 +91,10 @@ export const CustomTable = ({
                         ))}
                     </tr>
                 </thead>
+
                 <tbody>
                     {isLoading ? (
-                        // Use skeleton rows
+                        // Skeleton rows
                         Array.from({ length: 5 }).map((_, i) => (
                             <tr key={i} className="animate-pulse">
                                 <td className="border px-4 py-2 text-center">
@@ -130,27 +134,51 @@ export const CustomTable = ({
                                         {from + index}
                                     </td>
                                 )}
+
                                 {columns.map((col) => (
                                     <td
                                         key={col.key}
                                         className={`border px-4 py-2 text-center ${col.className}`}
                                     >
                                         {col.isToggle ? (
-                                            <Switch
-                                                checked={!!row.is_active}
-                                                disabled={!!row.removed_at}
-                                                onCheckedChange={(checked) =>
-                                                    onStatusToggle?.(
-                                                        Number(row.id),
+                                            canActivateDeactivate ? (
+                                                <Switch
+                                                    checked={!!row.is_active}
+                                                    disabled={!!row.removed_at}
+                                                    onCheckedChange={(
                                                         checked
-                                                    )
-                                                }
-                                                className={`h-4 w-10 ${
-                                                    row.is_active
-                                                        ? "bg-green-500 data-[state=checked]:bg-green-600"
-                                                        : "bg-red-500 data-[state=unchecked]:bg-red-600"
-                                                } border border-gray-300 transition-colors rounded-full shadow-inner`}
-                                            />
+                                                    ) =>
+                                                        onStatusToggle?.(
+                                                            Number(row.id),
+                                                            checked
+                                                        )
+                                                    }
+                                                    className={`relative h-4 w-10 border border-gray-300 rounded-full shadow-inner transition-colors
+                                                        ${
+                                                            row.is_active
+                                                                ? "bg-green-500 data-[state=checked]:bg-green-600"
+                                                                : "bg-red-500 data-[state=unchecked]:bg-red-600"
+                                                        }
+                                                        [&>span]:bg-white [&>span]:border [&>span]:border-gray-300
+                                                        [&>span]:transition-transform [&>span]:duration-200
+                                                        
+                                                        rtl:[&>span]:left-auto rtl:[&>span]:right-0 rtl:[&>span[data-state=checked]]:translate-x-[-1.5rem]
+                                                        ltr:[&>span[data-state=checked]]:translate-x-[1.5rem]
+                                                    `}
+                                                />
+                                            ) : (
+                                                <span
+                                                    className={`inline-block px-2 py-1 text-xs rounded-full ${
+                                                        row.is_active
+                                                            ? "bg-green-100 text-green-700"
+                                                            : "bg-red-100 text-red-700"
+                                                    }`}
+                                                >
+                                                    {row.is_active
+                                                        ? t("Active")
+                                                        : t("Inactive")}
+                                                </span>
+                                            )
                                         ) : col.isAction ? (
                                             <div className="flex justify-center">
                                                 <TableActionButtons
@@ -161,8 +189,25 @@ export const CustomTable = ({
                                                     onEdit={onEdit}
                                                     onDelete={onDelete}
                                                     onRestore={onRestore}
+                                                    canEdit={canEdit}
+                                                    canDelete={canDelete}
+                                                    canRestore={canRestore}
+                                                    canView={canView}
+                                                    isRTL={isRTL}
                                                 />
                                             </div>
+                                        ) : col.key === "removed" ? (
+                                            <span
+                                                className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
+                                                    row[col.key] === "No"
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-red-100 text-red-700"
+                                                }`}
+                                            >
+                                                {row[col.key] === "No"
+                                                    ? t("No")
+                                                    : t("Yes")}
+                                            </span>
                                         ) : (
                                             String(row[col.key] ?? "")
                                         )}

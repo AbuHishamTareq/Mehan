@@ -13,6 +13,8 @@ import { Pagination } from "../../components/ui/pagination";
 import { ModuleController } from "../../controllers/ModuleController";
 import { Input } from "../../components/ui/input";
 import { Search } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { hasPermission } from "../../lib/authorization";
 
 interface ModuleFormValue {
     label: string;
@@ -54,6 +56,7 @@ const Modules = () => {
 
     // Persist current perPage in state
     const [currentPerPage, setCurrentPerPage] = useState(10);
+    const { user } = useAuth();
 
     const defaultFormValues: ModuleFormValue = {
         label: "",
@@ -78,6 +81,11 @@ const Modules = () => {
     const searchValue = watch("search");
 
     const initialMount = useRef(true);
+
+    const userPermissions = user?.permissions || [];
+    const canAdd = hasPermission(`create_module`, userPermissions);
+    const canEdit = hasPermission(`edit_role`, userPermissions);
+    const canView = hasPermission(`view_role`, userPermissions);
 
     const fetchModuleData = useCallback(
         async (
@@ -124,10 +132,41 @@ const Modules = () => {
         return () => clearTimeout(timer);
     }, [searchValue, currentPerPage, fetchModuleData]);
 
+    // TRANSLATE MODEL FORM
+    const translatedConfig = {
+        ...ModuleModelFormConfig,
+        moduleTitle: t("manageModules"),
+        title: t("addNewModule"),
+        description: t("moduleDescription"),
+        addButton: {
+            ...ModuleModelFormConfig.addButton,
+            label: t("addNewModule"),
+            className: `${ModuleModelFormConfig.addButton.className} ${font}`,
+        },
+        fields: ModuleModelFormConfig.fields.map((field) => ({
+            ...field,
+            label: t("moduleName"),
+            placeholder: t("modulePlaceholder"),
+            className: `${field.className ?? ""} ${font}`,
+        })),
+        buttons: ModuleModelFormConfig.buttons.map((btn) => ({
+            ...btn,
+            label: t(btn.key === "cancel" ? "cancel" : "saveChanges"),
+        })),
+    };
+
+    // TRANSLATE TABLES HEADERS
     const columns = ModuleTableConfig.columns.map((col) => ({
         ...col,
         label: t(col.label),
         className: `${col.className} ${font}`,
+    }));
+
+    // TRANSLATE TOOLTIP FOR ACTION BUTTONS
+    const actions = ModuleTableConfig.actions.map((action) => ({
+        ...action,
+        label: t(action.label),
+        tooltip: t(action.tooltip),
     }));
 
     const onSubmit = async (data: ModuleFormValue) => {
@@ -214,24 +253,38 @@ const Modules = () => {
                 <div className="flex items-center justify-between mb-2">
                     <div className="relative w-1/2">
                         <Input
-                            placeholder="Search Modules..."
-                            className="h-10 w-full pr-10 border border-blue-200"
+                            placeholder={t("searchModule")}
+                            className={`h-10 w-full border border-blue-200 ${font} ${
+                                isRTL ? "pl-10 pr-4" : "pr-10 pl-4"
+                            }`}
                             {...register("search")}
                         />
-                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                        <Search
+                            className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 ${
+                                isRTL ? "left-4 scale-x-[-1]" : "right-4"
+                            }`}
+                        />
                     </div>
                     <CustomModelForm
                         title={
                             mode === "view"
-                                ? "View Module"
+                                ? t("viewModule")
                                 : mode === "edit"
-                                ? "Edit Module"
-                                : ModuleModelFormConfig.title
+                                ? t("editModule")
+                                : translatedConfig.title
                         }
-                        description={ModuleModelFormConfig.description}
-                        addButton={ModuleModelFormConfig.addButton}
-                        fields={ModuleModelFormConfig.fields}
-                        buttons={ModuleModelFormConfig.buttons}
+                        description={
+                            mode === "view"
+                                ? ""
+                                : mode === "edit"
+                                ? t("editModuleDesc")
+                                : translatedConfig.description
+                        }
+                        addButton={
+                            canAdd ? translatedConfig.addButton : undefined
+                        }
+                        fields={translatedConfig.fields}
+                        buttons={translatedConfig.buttons}
                         register={register}
                         errors={errors}
                         isSubmitting={formSubmitting}
@@ -246,13 +299,15 @@ const Modules = () => {
                 {/* Table */}
                 <CustomTable
                     columns={columns}
-                    actions={ModuleTableConfig.actions}
+                    actions={actions}
                     data={modules.modules.data}
                     isLoading={pageLoading}
                     onView={(row) => openModel("view", row as ModuleProps)}
                     onEdit={(row) => openModel("edit", row as ModuleProps)}
                     isModel={true}
                     from={modules.modules.from}
+                    canEdit={canEdit}
+                    canView={canView}
                 />
 
                 {/* Pagination */}

@@ -2,28 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\DesignationImport;
-use App\Imports\ResignationImport;
+use App\Imports\UserImport;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
-class DesignationController extends Controller
+class UserController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Designation::withTrashed()->with("department");
+        $query = User::withTrashed()->with(["department", "designation", "roles"]);
 
         if ($search = $request->query("search")) {
             $query->where(function ($q) use ($search) {
-                $q->where("en_name", "like", "%{$search}%")
-                    ->orWhere("en_name", "like", "%{$search}%")
-                    ->orWhereHas("department", function ($mq) use ($search) {
+                $q->where("name", "like", "%{$search}%")
+                    ->orWhere("email", "like", "%{$search}%")
+                    ->orWhere("mobile_number", "like", "%{$search}%")
+                    ->orWhereHas("designation", function ($mq) use ($search) {
                         $mq->where("en_name", "like", "%{$search}%");
                     });
             });
@@ -32,29 +35,34 @@ class DesignationController extends Controller
         $perPage = $request->query("perPage", 10);
 
         if ($perPage == -1) {
-            $allDesignations = $query->orderBy("created_at", "DESC")->get();
+            $allUsers = $query->orderBy("created_at", "DESC")->get();
 
-            $designations = new LengthAwarePaginator(
-                $allDesignations,
-                $allDesignations->count(),
-                $allDesignations->count(),
+            $users = new LengthAwarePaginator(
+                $allUsers,
+                $allUsers->count(),
+                $allUsers->count(),
                 1, // current page
                 ['path' => $request->url(), 'query' => $request->query()]
             );
         } else {
-            $designations = $query->orderBy("created_at", "DESC")->paginate($perPage);
+            $users = $query->orderBy("created_at", "DESC")->paginate($perPage);
         }
 
-        $designations = $designations->through(function ($designation) {
+        $users = $users->through(function ($user) {
             return [
-                "id" => $designation->id,
-                "en_name" => $designation->en_name,
-                "ar_name" => $designation->ar_name,
-                "department_id" => $designation->department_id,
-                "is_active" => $designation->is_active,
-                "department" => $designation->department->en_name,
-                "removed_at" => $designation->removed_at,
-                "removed" => $designation->removed_at ? "Yes" : "No"
+                "id" => $user->id,
+                "name" => $user->name,
+                "email" => $user->email,
+                "password" => $user->password,
+                "mobile_number" => $user->mobile_number,
+                "department_id" => $user->department_id,
+                "designation_id" => $user->designation_id,
+                "is_active" => $user->is_active,
+                "department" => $user->department->en_name,
+                "designation" => $user->designation->en_name,
+                "removed_at" => $user->removed_at,
+                "removed" => $user->removed_at ? "Yes" : "No",
+                "roles" => $user->roles->pluck('name'),
             ];
         });
 
@@ -68,31 +76,60 @@ class DesignationController extends Controller
                 ];
             });
 
+        $designations = Designation::where('is_active', true)
+            ->get() // Use get() to get a Collection
+            ->map(function ($designation) {
+                return [
+                    "label" => $designation->en_name . " (" . $designation->ar_name . ")",
+                    "value" => $designation->id,
+                    "key"   => $designation->id,
+                ];
+            });
+
+        $roles = Role::where('is_active', true)
+            ->get() // Use get() to get a Collection
+            ->map(function ($role) {
+                return [
+                    "label" => $role->label,
+                    "value" => $role->name,
+                    "key"   => $role->id,
+                ];
+            });
+
         return response()->json([
+            "users" => $users,
+            "departments" => $departments,
             "designations" => $designations,
-            "departments" => $departments
+            "roles" => $roles,
         ]);
     }
 
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            "en_name" => "required|string",
-            "ar_name" => "required|string",
+            "name" => "required|string",
+            "email" => "required|string",
+            "password" => "required|string",
             "department" => "required|numeric",
+            "designation" => "required|numeric",
+            "mobile_number" => "required|string",
         ]);
 
-        $designation = Designation::create([
-            "en_name" => $request->input("en_name"),
-            "ar_name" => $request->input("ar_name"),
+        $user = User::create([
+            "name" => $request->input("name"),
+            "email" => $request->input("email"),
+            "password" => Hash::make($request->input("password")),
             "department_id" => $request->input("department"),
+            "designation_id" => $request->input("designation"),
+            "mobile_number" => $request->input("mobile_number"),
             "is_active" => $request->input("is_active") ?? true,
             "created_by" => Auth::id()
         ]);
 
-        if ($designation) {
+        if ($user) {
+            $user->syncRoles($request->input('role', []));
             return response()->json([
-                "message" => "Designation created successfully",
+                "message" => "User created successfully",
                 "status" => 201 // HTTP status code for Created
             ], 201);
         }
@@ -106,28 +143,35 @@ class DesignationController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         $request->validate([
-            "en_name" => "required|string",
-            "ar_name" => "required|string",
+            "name" => "required|string",
+            "email" => "required|string",
+            "password" => "required|string",
             "department" => "required|numeric",
+            "designation" => "required|numeric",
+            "mobile_number" => "required|string",
         ]);
 
-        $designation = Designation::find($id);
+        $user = User::find($id);
 
-        if (!$designation) {
+        if (!$user) {
             return response()->json([
-                "message" => "Designation not found",
+                "message" => "User not found",
                 "status" => 404
             ], 404);
         }
 
-        $designation->en_name = $request->input("en_name");
-        $designation->ar_name = $request->input("ar_name");
-        $designation->department_id = $request->input("department");
-        $designation->updated_by = Auth::id();
-        $designation->save();
+        $user->name = $request->input("name");
+        $user->email = $request->input("email");
+        $user->department_id = $request->input("department");
+        $user->designation_id = $request->input("designation");
+        $user->mobile_number = $request->input("mobile_number");
+        $user->updated_by = Auth::id();
+        $user->save();
+
+        $user->syncRoles($request->input('role', []));
 
         return response()->json([
-            "message" => "Designation updated successfully",
+            "message" => "User updated successfully",
             "status" => 200
         ], 200);
     }
@@ -136,12 +180,12 @@ class DesignationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "ids" => "required|array|min:1",
-            "ids.*" => "integer|exists:designations,id"
+            "ids.*" => "integer|exists:users,id"
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                "message" => "Invalid designation IDs provided.",
+                "message" => "Invalid user IDs provided.",
                 "details" => $validator->errors(),
                 "status" => 422
             ], 422);
@@ -149,7 +193,7 @@ class DesignationController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Designation::whereIn("id", $ids)->whereNull("removed_at")->update([
+        $updated = User::whereIn("id", $ids)->whereNull("removed_at")->update([
             "is_active" => true
         ]);
 
@@ -162,7 +206,7 @@ class DesignationController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to activate designations. Please try again later.",
+            "message" => "Failed to activate users. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -172,12 +216,12 @@ class DesignationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "ids" => "required|array|min:1",
-            "ids.*" => "integer|exists:designations,id"
+            "ids.*" => "integer|exists:users,id"
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                "message" => "Invalid designation IDs provided.",
+                "message" => "Invalid user IDs provided.",
                 "details" => $validator->errors(),
                 "status" => 422
             ], 422);
@@ -185,7 +229,7 @@ class DesignationController extends Controller
 
         $ids = $request->input("ids");
 
-        $updated = Designation::whereIn("id", $ids)->whereNull("removed_at")->update([
+        $updated = User::whereIn("id", $ids)->whereNull("removed_at")->update([
             "is_active" => false
         ]);
 
@@ -198,7 +242,7 @@ class DesignationController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to deactivate designations. Please try again later.",
+            "message" => "Failed to deactivate users. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -209,7 +253,7 @@ class DesignationController extends Controller
         $id = $request->input("id");
         $is_active = $request->input("is_active");
 
-        $updated = Designation::where("id", $id)->update([
+        $updated = User::where("id", $id)->update([
             "is_active" => $is_active
         ]);
 
@@ -222,7 +266,7 @@ class DesignationController extends Controller
         }
 
         return response()->json([
-            "message" => "Failed to activate designations. Please try again later.",
+            "message" => "Failed to activate users. Please try again later.",
             "count" => 0,
             "status" => 500
         ], 500);
@@ -230,38 +274,38 @@ class DesignationController extends Controller
 
     public function destroy($id): JsonResponse
     {
-        $designation = Designation::find($id);
+        $user = User::find($id);
 
-        if (!$designation) {
+        if (!$user) {
             return response()->json([
-                "message" => "Designation not found !",
+                "message" => "User not found !",
                 "status" => 404
             ], 404);
         }
 
-        $designation->delete();
+        $user->delete();
 
         return response()->json([
-            "message" => "Designation deleted successfully !",
+            "message" => "User deleted successfully !",
             "status" => 200
         ], 200);
     }
 
     public function restore($id): JsonResponse
     {
-        $designation = Designation::withTrashed()->find($id);
+        $user = User::withTrashed()->find($id);
 
-        if (!$designation) {
+        if (!$user) {
             return response()->json([
-                "message" => "Designation not found !",
+                "message" => "User not found !",
                 "status" => 404
             ], 404);
         }
 
-        $designation->restore();
+        $user->restore();
 
         return response()->json([
-            "message" => "Designation restored successfully !",
+            "message" => "User restored successfully !",
             "status" => 200
         ], 200);
     }
@@ -274,7 +318,7 @@ class DesignationController extends Controller
 
         try {
             $file = $request->file("file");
-            $import = new DesignationImport;
+            $import = new UserImport;
 
             Excel::import($import, $file);
 
@@ -316,7 +360,7 @@ class DesignationController extends Controller
             ], 500);
         }
         return response()->json([
-            "message" => "Failed to import designations data. Please try again later.",
+            "message" => "Failed to import users data. Please try again later.",
             "status" => 500
         ], 500);
     }

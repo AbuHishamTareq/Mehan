@@ -36,28 +36,28 @@ export const DepartmentTableConfig = {
         {
             label: "View",
             icon: "Eye" as keyof typeof LucidIcons,
-            tooltip: "View",
+            tooltip: "view",
             className:
                 "w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500 hover:bg-blue-600 text-white",
         },
         {
             label: "Edit",
             icon: "Edit" as keyof typeof LucidIcons,
-            tooltip: "Edit",
+            tooltip: "edit",
             className:
                 "w-8 h-8 flex items-center justify-center rounded-lg bg-amber-500 hover:bg-amber-600 text-white",
         },
         {
             label: "Delete",
             icon: "Trash2" as keyof typeof LucidIcons,
-            tooltip: "Delete",
+            tooltip: "delete",
             className:
                 "w-8 h-8 flex items-center justify-center rounded-lg bg-red-500 hover:bg-red-600 text-white",
         },
         {
             label: "Restore",
             icon: "RotateCcw" as keyof typeof LucidIcons,
-            tooltip: "Restore",
+            tooltip: "restore",
             className:
                 "w-8 h-8 flex items-center justify-center rounded-lg bg-green-500 hover:bg-green-600 text-white",
         },

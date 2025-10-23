@@ -83,10 +83,24 @@ const en = {
 
     // Permissions
     permission: "Permission",
+    permissions: "Permissions:",
     module: "Module",
     description: "Description",
     status: "Status",
     actions: "Actions",
+    modulePermissionFrm: "Module Name:",
+    modulePermissionFrmPlaceholder: "Choose Module",
+    permissionNameFrm: "Permission (ex. Create User):",
+    permissionNameFrmPlaceholder: "Enter permission",
+    permissionDescriptionFrm: "Permission Description:",
+    permissionDescriptionFrmPlaceholder: "Enter permission description",
+    searchPermission: "Search Permission...",
+    editPermission: "Edit Permission",
+    viewPermission: "View Permission",
+    managePermissions: "Manage Permissions",
+    addNewPermission: "Add New Permission",
+    permissionDesc: "Fill in the details below to add a new permission",
+    editPermissionDesc: "Edit the information below to update this permission.",
 
     // Data Not Found Messages
     notFound: "No data found",
@@ -94,24 +108,154 @@ const en = {
 
     // Roles
     role: "Role",
+    manageRoles: "Manage Roles",
+    addNewRole: "Add New Role",
+    roleDesc: "Fill in the details below to add a new role.",
+    roleName: "Role (ex. Administrator):",
+    roleNamePlaceholder: "Enter Role Name",
+    roleDescription: "Role Description:",
+    searchRole: "Search Role...",
+    editRole: "Edit Role",
+    viewRole: "View Role",
+    importRoles: "Import Roles",
+    editRoleDesc: "Edit the information below to update this role.",
 
     // Bulk Action
     bulkErrorMessage: "You must select at least one Record.",
     InactiveIdsErrorMessage: "All of the selected data is already active.",
+    roleDescriptionPlaceholder: "Enter Role Description",
     ActiveIdsErrorMessage: "All of the selected data is already inactive.",
 
     // Departments
     engName: "Department (EN)",
     arName: "Department (AR)",
+    deptName: "Department Name:",
+    deptNamePlaceholder: "Select Department",
     removed: "Deleted?",
     departmentDeleteMessage: "Department deleted successfully !",
     departmentRestoreMessage: "Department restored successfully !",
+    manageDepartments: "Manage Departments",
+    addNewDepartment: "Add New Department",
+    departmentDescription: "Fill in the details below to add a new department.",
+    deptEnName: "English Department Name (ex. IT Department):",
+    deptEnNamePlaceholder: "Enter English Department Name",
+    deptArName: "Arabic Department Name (ex. قسم تكنولوجيا المعلومات):",
+    deptArNamePlaceholder: "Enter Arabic Department Name",
+    searchDepartment: "Search Department...",
+    editDepartment: "Edit Department",
+    viewDepartment: "View Department",
+    importDepartments: "Import Departments",
+    deptImportNote: "Upload Excel file with columns: English name, Arabic name",
+    editDepartmentDesc: "Edit the information below to update this department.",
 
     //Designations
     en_designation: "Designation (EN)",
     ar_designation: "Designation (AR)",
     designationDeleteMessage: "Designation deleted successfully !",
     designationRestoreMessage: "Designation restored successfully !",
+    manageDesignations: "Manage Designations",
+    addNewDesignation: "Add New Designation",
+    designationDescription:
+        "Fill in the details below to add a new designation.",
+    designationEnName: "English Designation Name (ex. Software Engineer):",
+    designationEnNamePlaceholder: "Enter English Designation Name",
+    designationArName: "Arabic Designation Name (ex. مهندس برمجيات):",
+    designationArNamePlaceholder: "Enter Arabic Designation Name",
+    searchDesignation: "Search Designation...",
+    importDesignations: "Import Designations",
+    designationImportNote:
+        "Upload Excel file with columns: English name, Arabic name and Department",
+    viewDesignation: "View Designation",
+    editDesignation: "Edit Designation",
+    editDesignationDesc: "Edit the information below to update this role.",
+
+    // Modules
+    manageModules: "Manage Modules",
+    addNewModule: "Add New Module",
+    moduleDescription: "Fill in the details below to add a new module",
+    moduleName: "Module Name (ex. User):",
+    modulePlaceholder: "Enter Module Name",
+    editModule: "Edit Module",
+    viewModule: "View Module",
+    searchModule: "Search Module...",
+    editModuleDesc: "Edit the information below to update this Module.",
+
+    // Buttons for Add and Edit
+    cancel: "Cancel",
+    saveChanges: "Save Changes",
+
+    // Pagination
+    showing: "Showing",
+    to: "to",
+    of: "of",
+    entries: "entries",
+    rowPerPage: "Row per page",
+    all: "All",
+    next: "Next >>",
+    previous: "<< Previous",
+
+    // Action Buttons
+    edit: "Edit",
+    view: "View",
+    delete: "Delete",
+    restore: "Restore",
+
+    // Importing
+    downloadTemplate: "Download Template",
+    importing: "Importing...",
+    importFile: "Import File",
+    closeImportDialog: "Close Import Dialog",
+    openImportDialog: "Open Import Dialog",
+
+    // Status Action
+    statusAction: "Status Actions",
+    activateSelected: "Activate Selected",
+    deactivateSelected: "Deactivate Selected",
+
+    // Exporting
+    exportActions: "Export Actions",
+    exportCsv: "Export to CSV",
+    allPages: "All Pages",
+    currentPage: "Current Page",
+    selected: "selected",
+    exportExcel: "Export to Excel",
+    exportPdf: "Export to PDF",
+
+    // Clear selected
+    clear: "Clear Selection",
+
+    // User
+    username: "User Name",
+    mobile: "Mobile No.",
+    formUsername: "User name (ex. Khalid Ali):",
+    formUsernamePlaceholder: "Enter User Name",
+    formMobile: "Mobile No. (ex. 05XXXXXXXX):",
+    formMobilePlaceholder: "Enter Mobile Number 05XXXXXXXX",
+    formEmail: "Email (ex. khalid@company.com):",
+    formEmailPlaceholder: "Enter Email Address",
+    formConfirmPassword: "Confirm Password:",
+    formConfirmPasswordPlaceholder: "Confirm Password",
+    formPassword: "Password:",
+    formPasswordPlaceholder: "Enter Password",
+    formRole: "Role:",
+    formRolePlaceholder: "Choose Role",
+    formDepartment: "Department Name:",
+    formDepartmentPlaceholder: "Choose Department",
+    formDesignation: "Designation:",
+    formDesignationPlaceholder: "Choose Designation",
+    manageUsers: "Manage users",
+    addNewUser: "Add New User",
+    userDescription: "Fill in the details below to add a new user.",
+    searchUser: "Search User...",
+    importUsers: "Import Users",
+    userImportNote:
+        "Upload Excel file with columns: User name, Mobile Number, Email, Password, Role, Department and Designation",
+    viewUser: "View User",
+    editUser: "Edit User",
+    editUserDesc: "Edit the information below to update this permission.",
+
+    // Payments
+    payments: "Payments",
 };
 
 export default en;

@@ -1,14 +1,14 @@
 import { CirclePlus } from "lucide-react";
 
 export const DesignationModelFormConfig = {
-    moduleTitle: "Manage Designations",
-    title: "Add New Designation",
-    description: "Fill in the details below to add a new designation",
+    moduleTitle: "",
+    title: "",
+    description: "",
 
     // THIS FOR BUTTON IN THE TOP OF TABLE
     addButton: {
         id: "add-designation",
-        label: "Add New Designation",
+        label: "",
         className:
             "bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 cursor-pointer",
         icon: CirclePlus,
@@ -19,31 +19,34 @@ export const DesignationModelFormConfig = {
     fields: [
         {
             id: "department",
-            key: "department",
+            key: "deptName",
             name: "department",
-            label: "Department Name:",
+            label: "",
             type: "select" as const,
             placeholder: "Choose Department",
             tabindex: 1,
             autoFocus: true,
+            className: "",
         },
         {
             id: "en_name",
-            key: "en_name",
+            key: "designationEnName",
             name: "en_name",
-            label: "Designation (EN) (ex. IT Support):",
+            label: "",
             type: "text" as const,
-            placeholder: "Enter designation",
+            placeholder: "",
             tabindex: 2,
+            className: "",
         },
         {
             id: "ar_name",
-            key: "ar_name",
+            key: "designationArName",
             name: "ar_name",
             label: "Designation (AR) (ex. دعم تكنولوجيا المعلومات):",
             type: "text" as const,
             placeholder: "ادخل المسمى الوظيفي",
             tabindex: 2,
+            className: "",
         },
     ],
     // FORM BUTTONS
@@ -52,7 +55,7 @@ export const DesignationModelFormConfig = {
             key: "cancel",
             type: "button" as const,
             label: "Cancel",
-            variant: "ghost" as const,
+            variant: "destructive" as const,
             className: "cursor-pointer",
         },
         {

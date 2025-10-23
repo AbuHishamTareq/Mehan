@@ -1,22 +1,27 @@
 import * as LucidIcons from "lucide-react";
 // CREATE PERMISSION TABLE CONFIGURATIONS LIKE HEADERS, AND BODY
-export const DesignationTableConfig = {
+export const UserTableConfig = {
     // DEFINE TABLE COLUMNS
     columns: [
         // KEYS MUST BE THE SAME NAME OF COLUMN IN POSTGRESQL DATABASE
         {
+            label: "username",
+            key: "name",
+            className: "border p-4 text-center",
+        },
+        {
+            label: "email",
+            key: "email",
+            className: "border p-4 text-center",
+        },
+        {
+            label: "mobile",
+            key: "mobile_number",
+            className: "capitalize border p-4 text-center",
+        },
+        {
             label: "en_designation",
-            key: "en_name",
-            className: "border p-4 text-center",
-        },
-        {
-            label: "ar_designation",
-            key: "ar_name",
-            className: "border p-4 text-center",
-        },
-        {
-            label: "engName",
-            key: "department",
+            key: "designation",
             className: "capitalize border p-4 text-center",
         },
         {

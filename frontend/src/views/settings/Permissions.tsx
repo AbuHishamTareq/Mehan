@@ -19,6 +19,8 @@ import { PermissionTableConfig } from "../../config/tables/permission-table";
 import { BulkAction } from "../../components/bulk-action";
 import { Search } from "lucide-react";
 import { generateAndDownloadFile } from "../../lib/generateAndDownloadFile";
+import { hasPermission } from "../../lib/authorization";
+import { useAuth } from "../../hooks/useAuth";
 
 interface PermissionFormValue {
     module: string;
@@ -50,6 +52,7 @@ const Permissions = () => {
     const { t, isRTL } = useLanguage();
     const font = isRTL ? "font-arabic" : "font-english";
     const { toast } = useToast();
+    const { user } = useAuth();
 
     const [modelOpen, setModelOpen] = useState(false);
     const [permissions, setPermissions] = useState<PermissionIndexProps>({
@@ -68,6 +71,18 @@ const Permissions = () => {
 
     type ExportType = "csv" | "excel" | "pdf";
     type ExportScope = "all" | "current" | "selected";
+
+    const userPermissions = user?.permissions || [];
+
+    const canAdd = hasPermission(`create_permission`, userPermissions);
+    // const canPrint = hasPermission(`print-domain`, userPermissions);
+    const canExport = hasPermission(`export_permission`, userPermissions);
+    const canActivateDeactivate = hasPermission(
+        `active_deactive_permission`,
+        userPermissions
+    );
+    const canEdit = hasPermission(`edit_permission`, userPermissions);
+    const canView = hasPermission(`view_permission`, userPermissions);
 
     const defaultFormValues: PermissionFormValue = {
         module: "",
@@ -94,10 +109,6 @@ const Permissions = () => {
 
     const searchValue = watch("search");
     const initialMount = useRef(true);
-
-    const dynamicOptionsFields = PermissionModelFormConfig.fields.map((field) =>
-        field.name === "module" ? { ...field, options: modules } : field
-    );
 
     const fetchPermissionData = useCallback(
         async (
@@ -145,10 +156,49 @@ const Permissions = () => {
         return () => clearTimeout(timer);
     }, [searchValue, currentPerPage, fetchPermissionData]);
 
+    // TRANSLATE MODEL FORM
+    const translatedConfig = {
+        ...PermissionModelFormConfig,
+        moduleTitle: t("managePermissions"),
+        title: t("addNewPermission"),
+        description: t("permissionDesc"),
+        addButton: {
+            ...PermissionModelFormConfig.addButton,
+            label: t("addNewPermission"),
+            className: `${PermissionModelFormConfig.addButton.className} ${font}`,
+        },
+        fields: PermissionModelFormConfig.fields.map((field) => {
+            // Add dynamic options if the field is "department"
+            const baseField =
+                field.name === "module"
+                    ? { ...field, options: modules }
+                    : field;
+
+            return {
+                ...baseField,
+                label: t(baseField.key), // translate label
+                placeholder: t(baseField.key + "Placeholder"), // translate placeholder
+                className: `${baseField.className ?? ""} ${font}`,
+            };
+        }),
+        buttons: PermissionModelFormConfig.buttons.map((btn) => ({
+            ...btn,
+            label: t(btn.key === "cancel" ? "cancel" : "saveChanges"),
+        })),
+    };
+
+    // TRANSLATE TABLES HEADERS
     const columns = PermissionTableConfig.columns.map((col) => ({
         ...col,
         label: t(col.label),
         className: `${col.className} ${font}`,
+    }));
+
+    // TRANSLATE TOOLTIP FOR ACTION BUTTONS
+    const actions = PermissionTableConfig.actions.map((action) => ({
+        ...action,
+        label: t(action.label),
+        tooltip: t(action.tooltip),
     }));
 
     const onSubmit = async (data: PermissionFormValue) => {
@@ -258,9 +308,7 @@ const Permissions = () => {
                 });
                 return;
             }
-            dataToExport = data.filter((d) =>
-                selectedRows.includes(d.id!)
-            );
+            dataToExport = data.filter((d) => selectedRows.includes(d.id!));
             fileName = `permissions_selected_${selectedRows.length}`;
         }
 
@@ -350,7 +398,7 @@ const Permissions = () => {
                         onSuccess={() =>
                             fetchPermissionData(searchValue, currentPerPage)
                         }
-                        title="permision"
+                        title={isRTL ? "الصلاحية" : "permision"}
                         exportAllCsvFn={handleExportAllCSV}
                         exportCurrentPageCsv={handleCurrentPageExportCSV}
                         exportSelectedRowsCsv={handleExportSelectedCSV}
@@ -361,6 +409,8 @@ const Permissions = () => {
                         exportCurrentPagePdf={handleCurrentPageExportPdf}
                         exportSelectedRowsPdf={handleExportSelectedPdf}
                         showImportButton={false}
+                        canExport={canExport}
+                        canActivateDeactivate={canActivateDeactivate}
                     />
                 </div>
 
@@ -368,24 +418,38 @@ const Permissions = () => {
                 <div className="flex items-center justify-between mb-2">
                     <div className="relative w-1/2">
                         <Input
-                            placeholder="Search Permissions..."
-                            className="h-10 w-full pr-10 border border-blue-200" // add padding-right for icon
+                            placeholder={t("searchPermission")}
+                            className={`h-10 w-full border border-blue-200 ${font} ${
+                                isRTL ? "pl-10 pr-4" : "pr-10 pl-4"
+                            }`}
                             {...register("search")}
                         />
-                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                        <Search
+                            className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 ${
+                                isRTL ? "left-4 scale-x-[-1]" : "right-4"
+                            }`}
+                        />
                     </div>
                     <CustomModelForm
                         title={
                             mode === "view"
-                                ? "View Permission"
+                                ? t("viewPermission")
                                 : mode === "edit"
-                                ? "Edit Permission"
-                                : PermissionModelFormConfig.title
+                                ? t("editPermission")
+                                : translatedConfig.title
                         }
-                        description={PermissionModelFormConfig.description}
-                        addButton={PermissionModelFormConfig.addButton}
-                        fields={dynamicOptionsFields}
-                        buttons={PermissionModelFormConfig.buttons}
+                        description={
+                            mode === "view"
+                                ? ""
+                                : mode === "edit"
+                                ? t("editPermissionDesc")
+                                : translatedConfig.description
+                        }
+                        addButton={
+                            canAdd ? translatedConfig.addButton : undefined
+                        }
+                        fields={translatedConfig.fields}
+                        buttons={translatedConfig.buttons}
                         register={register}
                         errors={errors}
                         isSubmitting={formSubmitting}
@@ -400,7 +464,7 @@ const Permissions = () => {
                 {/* Table */}
                 <CustomTable
                     columns={columns}
-                    actions={PermissionTableConfig.actions}
+                    actions={actions}
                     data={permissions.permissions.data}
                     isLoading={pageLoading}
                     onView={(row) => openModel("view", row as PermissionProps)}
@@ -411,6 +475,9 @@ const Permissions = () => {
                     selectedRows={selectedRows}
                     onSelectionChange={handleSelectionChange}
                     onStatusToggle={(id, checked) => handleToggle(id, checked)}
+                    canEdit={canEdit}
+                    canView={canView}
+                    canActivateDeactivate={canActivateDeactivate}
                 />
 
                 {/* Pagination */}

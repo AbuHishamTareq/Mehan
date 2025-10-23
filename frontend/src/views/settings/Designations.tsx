@@ -23,6 +23,8 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { Button } from "../../components/ui/button";
 import Swal from "sweetalert2";
+import { useAuth } from "../../hooks/useAuth";
+import { hasPermission } from "../../lib/authorization";
 
 interface DesignationFormValue {
     en_name: string;
@@ -55,6 +57,7 @@ const Designations = () => {
     const { t, isRTL } = useLanguage();
     const font = isRTL ? "font-arabic" : "font-english";
     const { toast } = useToast();
+    const { user } = useAuth();
 
     const [modelOpen, setModelOpen] = useState(false);
     const [designations, setDesignations] = useState<DesignationIndexProps>({
@@ -65,7 +68,7 @@ const Designations = () => {
     const [formSubmitting, setFormSubmitting] = useState(false);
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [mode, setMode] = useState<"create" | "view" | "edit">("create");
-    const [selectedPermission, setSelectedPermission] =
+    const [selectedDesignation, setSelectedDesignation] =
         useState<DesignationProps | null>(null);
 
     // Persist current perPage
@@ -76,6 +79,20 @@ const Designations = () => {
 
     type ExportType = "csv" | "excel" | "pdf";
     type ExportScope = "all" | "current" | "selected";
+
+    const userPermissions = user?.permissions || [];
+    const canAdd = hasPermission(`create_designation`, userPermissions);
+    // const canPrint = hasPermission(`print-domain`, userPermissions);
+    const canExport = hasPermission(`export_designation`, userPermissions);
+    const canImport = hasPermission(`import_designation`, userPermissions);
+    const canActivateDeactivate = hasPermission(
+        `active_deactive_designation`,
+        userPermissions
+    );
+    const canEdit = hasPermission(`edit_designation`, userPermissions);
+    const canDelete = hasPermission(`delete_designation`, userPermissions);
+    const canView = hasPermission(`view_designation`, userPermissions);
+    const canRestore = hasPermission(`restore_designation`, userPermissions);
 
     const defaultFormValues: DesignationFormValue = {
         department: "",
@@ -103,13 +120,6 @@ const Designations = () => {
     const searchValue = watch("search");
     const initialMount = useRef(true);
 
-    const dynamicOptionsFields = DesignationModelFormConfig.fields.map(
-        (field) =>
-            field.name === "department"
-                ? { ...field, options: departments }
-                : field
-    );
-
     const fetchDesignationData = useCallback(
         async (
             search?: string,
@@ -127,7 +137,6 @@ const Designations = () => {
                     page,
                 });
 
-                console.log(response);
                 setDesignations(response);
                 setDepartments(response.departments);
             } catch (error) {
@@ -158,18 +167,57 @@ const Designations = () => {
         return () => clearTimeout(timer);
     }, [searchValue, currentPerPage, fetchDesignationData]);
 
+    // TRANSLATE MODEL FORM
+    const translatedConfig = {
+        ...DesignationModelFormConfig,
+        moduleTitle: t("manageDesignations"),
+        title: t("addNewDesignation"),
+        description: t("designationDescription"),
+        addButton: {
+            ...DesignationModelFormConfig.addButton,
+            label: t("addNewDesignation"),
+            className: `${DesignationModelFormConfig.addButton.className} ${font}`,
+        },
+        fields: DesignationModelFormConfig.fields.map((field) => {
+            // Add dynamic options if the field is "department"
+            const baseField =
+                field.name === "department"
+                    ? { ...field, options: departments }
+                    : { ...field };
+
+            return {
+                ...baseField,
+                label: t(baseField.key), // translate label
+                placeholder: t(baseField.key + "Placeholder"), // translate placeholder
+                className: `${baseField.className ?? ""} ${font}`,
+            };
+        }),
+        buttons: DesignationModelFormConfig.buttons.map((btn) => ({
+            ...btn,
+            label: t(btn.key === "cancel" ? "cancel" : "saveChanges"),
+        })),
+    };
+
+    // TRANSLATE TABLES HEADERS
     const columns = DesignationTableConfig.columns.map((col) => ({
         ...col,
         label: t(col.label),
         className: `${col.className} ${font}`,
     }));
 
+    // TRANSLATE TOOLTIP FOR ACTION BUTTONS
+    const actions = DesignationTableConfig.actions.map((action) => ({
+        ...action,
+        label: t(action.label),
+        tooltip: t(action.tooltip),
+    }));
+
     const onSubmit = async (data: DesignationFormValue) => {
         setFormSubmitting(true);
         try {
-            if (mode === "edit" && selectedPermission) {
+            if (mode === "edit" && selectedDesignation) {
                 const response = await DesignationController.updateDesignation(
-                    selectedPermission.id!,
+                    selectedDesignation.id!,
                     data as DesignationProps
                 );
                 toast({
@@ -205,7 +253,7 @@ const Designations = () => {
 
     const closeModel = () => {
         setMode("create");
-        setSelectedPermission(null);
+        setSelectedDesignation(null);
         reset(defaultFormValues);
         setModelOpen(false);
     };
@@ -226,7 +274,7 @@ const Designations = () => {
                 en_name: designation.en_name,
                 ar_name: designation.ar_name,
             });
-            setSelectedPermission(designation);
+            setSelectedDesignation(designation);
         }
         setModelOpen(true);
     };
@@ -513,6 +561,8 @@ const Designations = () => {
                 variant: "success",
             });
 
+            setIsImportOpen(false);
+
             // Show warnings if any
             if (response.warnings && response.warnings.length > 0) {
                 console.warn("Import warnings:", response.warnings);
@@ -561,7 +611,7 @@ const Designations = () => {
                         onSuccess={() =>
                             fetchDesignationData(searchValue, currentPerPage)
                         }
-                        title="designation"
+                        title={isRTL ? "المسمى الوظيفي" : "designation"}
                         exportAllCsvFn={handleExportAllCSV}
                         exportCurrentPageCsv={handleCurrentPageExportCSV}
                         exportSelectedRowsCsv={handleExportSelectedCSV}
@@ -572,8 +622,10 @@ const Designations = () => {
                         exportCurrentPagePdf={handleCurrentPageExportPdf}
                         exportSelectedRowsPdf={handleExportSelectedPdf}
                         onToggleImport={() => setIsImportOpen((prev) => !prev)}
-                        isImportOpen={isImportOpen}
-                        showImportButton={true}
+                        isImportOpen={canImport ? isImportOpen : false}
+                        showImportButton={canImport ? true : false}
+                        canExport={canExport}
+                        canActivateDeactivate={canActivateDeactivate}
                     />
                 </div>
 
@@ -584,8 +636,10 @@ const Designations = () => {
                             <div className="flex items-center justify-between flex-wrap gap-4">
                                 <div className="flex items-center gap-2">
                                     <Upload className="w-5 h-5 text-green-600" />
-                                    <span className="font-medium text-green-800">
-                                        Import Departments
+                                    <span
+                                        className={`font-medium text-green-800 ${font}`}
+                                    >
+                                        {t("importDesignations")}
                                     </span>
                                 </div>
 
@@ -595,10 +649,10 @@ const Designations = () => {
                                         variant="outline"
                                         size="sm"
                                         onClick={handleDownloadTemplate}
-                                        className="flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50 hover:text-black"
+                                        className={`flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50 hover:text-black ${font}`}
                                     >
                                         <FileText className="w-4 h-4" />
-                                        Download Template
+                                        {t("downloadTemplate")}
                                     </Button>
 
                                     {/* Import File */}
@@ -606,14 +660,14 @@ const Designations = () => {
                                         variant="outline"
                                         size="sm"
                                         asChild
-                                        className="border-green-300 text-green-700 hover:bg-green-50 hover:text-black"
+                                        className={`border-green-300 text-green-700 hover:bg-green-50 hover:text-black ${font}`}
                                         disabled={isImporting}
                                     >
                                         <label className="flex items-center gap-2 cursor-pointer">
                                             <Upload className="w-4 h-4" />
                                             {isImporting
-                                                ? "Importing..."
-                                                : "Import File"}
+                                                ? t("importing")
+                                                : t("importFile")}
                                             <input
                                                 type="file"
                                                 accept=".csv,.xlsx,.xls"
@@ -632,9 +686,10 @@ const Designations = () => {
                                     </Button>
                                 </div>
                             </div>
-                            <div className="mt-2 text-sm text-green-600">
-                                Upload Excel file with columns: english name,
-                                arabic name
+                            <div
+                                className={`mt-2 text-sm text-green-600 ${font}`}
+                            >
+                                {t("designationImportNote")}
                             </div>
                         </div>
                     </div>
@@ -644,24 +699,38 @@ const Designations = () => {
                 <div className="flex items-center justify-between mb-2">
                     <div className="relative w-1/2">
                         <Input
-                            placeholder="Search Designations..."
-                            className="h-10 w-full pr-10 border border-blue-200" // add padding-right for icon
+                            placeholder={t("searchDesignation")}
+                            className={`h-10 w-full border border-blue-200 ${font} ${
+                                isRTL ? "pl-10 pr-4" : "pr-10 pl-4"
+                            }`}
                             {...register("search")}
                         />
-                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                        <Search
+                            className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 ${
+                                isRTL ? "left-4 scale-x-[-1]" : "right-4"
+                            }`}
+                        />
                     </div>
                     <CustomModelForm
                         title={
                             mode === "view"
-                                ? "View Designation"
+                                ? t("viewDesignation")
                                 : mode === "edit"
-                                ? "Edit Designation"
-                                : DesignationModelFormConfig.title
+                                ? t("editDesignation")
+                                : translatedConfig.title
                         }
-                        description={DesignationModelFormConfig.description}
-                        addButton={DesignationModelFormConfig.addButton}
-                        fields={dynamicOptionsFields}
-                        buttons={DesignationModelFormConfig.buttons}
+                        description={
+                            mode === "view"
+                                ? ""
+                                : mode === "edit"
+                                ? t("editDesignationDesc")
+                                : translatedConfig.description
+                        }
+                        addButton={
+                            canAdd ? translatedConfig.addButton : undefined
+                        }
+                        fields={translatedConfig.fields}
+                        buttons={translatedConfig.buttons}
                         register={register}
                         errors={errors}
                         isSubmitting={formSubmitting}
@@ -676,7 +745,7 @@ const Designations = () => {
                 {/* Table */}
                 <CustomTable
                     columns={columns}
-                    actions={DesignationTableConfig.actions}
+                    actions={actions}
                     data={designations.designations.data}
                     isLoading={pageLoading}
                     onView={(row) => openModel("view", row as DesignationProps)}
@@ -689,6 +758,11 @@ const Designations = () => {
                     selectedRows={selectedRows}
                     onSelectionChange={handleSelectionChange}
                     onStatusToggle={(id, checked) => handleToggle(id, checked)}
+                    canEdit={canEdit}
+                    canDelete={canDelete}
+                    canRestore={canRestore}
+                    canView={canView}
+                    canActivateDeactivate={canActivateDeactivate}
                 />
 
                 {/* Pagination */}

@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from "../components/ui/sidebar";
-import { AppSidebar } from "../components/AppSidebar";
+import { AppSidebar } from "./sidebar/AppSidebar";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";

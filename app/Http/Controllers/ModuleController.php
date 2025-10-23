@@ -5,26 +5,41 @@ namespace App\Http\Controllers;
 use App\Models\Module;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ModuleController extends Controller
 {
-    public function index(Request $request) : JsonResponse {
+    public function index(Request $request): JsonResponse
+    {
         $query = Module::query();
 
-        if($search = $request->query('search')) {
+        if ($search = $request->query('search')) {
             $query->where("label", "like", "%{$search}%");
         }
 
         $perPage = $request->query('perPage', 10);
 
-        $modules = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        if ($perPage == -1) {
+            $allModules = $query->orderBy("created_at", "DESC")->get();
+
+            $modules = new LengthAwarePaginator(
+                $allModules,
+                $allModules->count(),
+                $allModules->count(),
+                1, // current page
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        } else {
+            $modules = $query->orderBy("created_at", "DESC")->paginate($perPage);
+        }
 
         return response()->json([
             "modules" => $modules
         ]);
     }
 
-    public function store(Request $request) : JsonResponse {
+    public function store(Request $request): JsonResponse
+    {
         $request->validate([
             "label" => "required|string"
         ]);
@@ -39,14 +54,15 @@ class ModuleController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id) : JsonResponse {
+    public function update(Request $request, $id): JsonResponse
+    {
         $request->validate([
             "label" => "required|string"
         ]);
 
         $module = Module::find($id);
 
-        if(!$module) {
+        if (!$module) {
             return response()->json([
                 "message" => "Module not found",
                 "status" => 404
