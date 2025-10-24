@@ -101,6 +101,8 @@ const en = {
     addNewPermission: "Add New Permission",
     permissionDesc: "Fill in the details below to add a new permission",
     editPermissionDesc: "Edit the information below to update this permission.",
+    veiwPermissionDesc:
+        "Review permission information in read-only mode. Editing and modifications are restricted in this view.",
 
     // Data Not Found Messages
     notFound: "No data found",
@@ -119,6 +121,10 @@ const en = {
     viewRole: "View Role",
     importRoles: "Import Roles",
     editRoleDesc: "Edit the information below to update this role.",
+    selectAllPermissions: "Select All Permissions",
+    allPermissionsFor: "Select All Permissions for ",
+    veiwRoleDesc:
+        "Review role information in read-only mode. Editing and modifications are restricted in this view.",
 
     // Bulk Action
     bulkErrorMessage: "You must select at least one Record.",
@@ -147,6 +153,8 @@ const en = {
     importDepartments: "Import Departments",
     deptImportNote: "Upload Excel file with columns: English name, Arabic name",
     editDepartmentDesc: "Edit the information below to update this department.",
+    veiwDepartmentDesc:
+        "Review department information in read-only mode. Editing and modifications are restricted in this view.",
 
     //Designations
     en_designation: "Designation (EN)",
@@ -168,6 +176,8 @@ const en = {
     viewDesignation: "View Designation",
     editDesignation: "Edit Designation",
     editDesignationDesc: "Edit the information below to update this role.",
+    veiwDesignationDesc:
+        "Review designation information in read-only mode. Editing and modifications are restricted in this view.",
 
     // Modules
     manageModules: "Manage Modules",
@@ -179,6 +189,8 @@ const en = {
     viewModule: "View Module",
     searchModule: "Search Module...",
     editModuleDesc: "Edit the information below to update this Module.",
+    veiwModuleDesc:
+        "Review module information in read-only mode. Editing and modifications are restricted in this view.",
 
     // Buttons for Add and Edit
     cancel: "Cancel",
@@ -199,6 +211,7 @@ const en = {
     view: "View",
     delete: "Delete",
     restore: "Restore",
+    reset: "Reset Password",
 
     // Importing
     downloadTemplate: "Download Template",
@@ -253,9 +266,21 @@ const en = {
     viewUser: "View User",
     editUser: "Edit User",
     editUserDesc: "Edit the information below to update this permission.",
+    veiwUserDesc:
+        "Review user information in read-only mode. Editing and modifications are restricted in this view.",
 
     // Payments
     payments: "Payments",
+
+    // SweetAlart2
+    areYouSure: "Are you sure?",
+    deleteMessage: "You are about to delete",
+    yesDeleted: "Yes, delete it!",
+    restoreMessage: "You are about to restore",
+    yesRestored: "Yes, restore it!",
+    resetMessage: "You are about to reset password for",
+    yesReset: "Yes, reset it!",
+    resetSuccess: "Password reset successfully. The new password is: ",
 };
 
 export default en;

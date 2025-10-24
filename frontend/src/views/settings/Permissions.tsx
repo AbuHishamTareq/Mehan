@@ -440,7 +440,7 @@ const Permissions = () => {
                         }
                         description={
                             mode === "view"
-                                ? ""
+                                ? t("veiwPermissionDesc")
                                 : mode === "edit"
                                 ? t("editPermissionDesc")
                                 : translatedConfig.description

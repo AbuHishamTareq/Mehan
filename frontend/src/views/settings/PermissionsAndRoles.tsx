@@ -92,6 +92,8 @@ const PermissionsAndRoles = () => {
     );
     const canEdit = hasPermission(`edit_role`, userPermissions);
     const canView = hasPermission(`view_role`, userPermissions);
+    console.log(user?.roles);
+    const userRole = user?.roles;
 
     const {
         register,
@@ -441,7 +443,7 @@ const PermissionsAndRoles = () => {
                         }
                         description={
                             mode === "view"
-                                ? ""
+                                ? t("veiwRoleDesc")
                                 : mode === "edit"
                                 ? t("editRoleDesc")
                                 : translatedConfig.description
@@ -460,6 +462,7 @@ const PermissionsAndRoles = () => {
                         onOpenChange={handleModelToggle}
                         mode={mode}
                         extraData={{ permissions }}
+                        userRole={userRole}
                     />
                 </div>
 

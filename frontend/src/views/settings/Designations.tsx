@@ -306,16 +306,23 @@ const Designations = () => {
         if (!designation) return;
 
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: `You are about to delete "${designation.en_name}" !`,
-            icon: "warning",
+            title: t("areYouSure"),
+            text: `${t("deleteMessage")} "${designation.en_name}" !`,
+            icon: "question",
             showCancelButton: true,
-            confirmButtonColor: "#dc2626", // red
-            cancelButtonColor: "#6b7280", // gray
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel",
+            confirmButtonColor: "#2E6F40", // dark green
+            cancelButtonColor: "#dc2626", // red
+            confirmButtonText: t("yesDeleted"),
+            cancelButtonText: t("cancel"),
             reverseButtons: true,
             background: "#f9fafb",
+
+            customClass: {
+                title: `${font}`,
+                htmlContainer: `${font}`,
+                confirmButton: `${font}`,
+                cancelButton: `${font}`,
+            },
         });
 
         if (result.isConfirmed) {
@@ -341,16 +348,23 @@ const Designations = () => {
         if (!designation) return;
 
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: `You are about to restore "${designation.en_name}" !`,
+            title: t("areYouSure"),
+            text: `${t("restoreMessage")} "${designation.en_name}" !`,
             icon: "question",
             showCancelButton: true,
             confirmButtonColor: "#2E6F40", // dark green
             cancelButtonColor: "#dc2626", // red
-            confirmButtonText: "Yes, restore it!",
-            cancelButtonText: "Cancel",
+            confirmButtonText: t("yesRestored"),
+            cancelButtonText: t("cancel"),
             reverseButtons: true,
             background: "#f9fafb",
+
+            customClass: {
+                title: `${font}`,
+                htmlContainer: `${font}`,
+                confirmButton: `${font}`,
+                cancelButton: `${font}`,
+            },
         });
 
         if (result.isConfirmed) {
@@ -721,7 +735,7 @@ const Designations = () => {
                         }
                         description={
                             mode === "view"
-                                ? ""
+                                ? t("veiwDesignationDesc")
                                 : mode === "edit"
                                 ? t("editDesignationDesc")
                                 : translatedConfig.description

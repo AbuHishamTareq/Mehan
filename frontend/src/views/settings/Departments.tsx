@@ -281,16 +281,23 @@ const Departments = () => {
         if (!department) return;
 
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: `You are about to delete "${department.en_name}" !`,
+            title: t("areYouSure"),
+            text: `${t("deleteMessage")} "${department.en_name}" !`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#dc2626", // red
             cancelButtonColor: "#6b7280", // gray
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel",
+            confirmButtonText: t("yesDeleted"),
+            cancelButtonText: t("cancel"),
             reverseButtons: true,
             background: "#f9fafb",
+
+            customClass: {
+                title: `${font}`,
+                htmlContainer: `${font}`,
+                confirmButton: `${font}`,
+                cancelButton: `${font}`,
+            },
         });
 
         if (result.isConfirmed) {
@@ -316,16 +323,23 @@ const Departments = () => {
         if (!department) return;
 
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: `You are about to restore "${department.en_name}" !`,
+            title: t("areYouSure"),
+            text: `${t("restoreMessage")} "${department.en_name}" !`,
             icon: "question",
             showCancelButton: true,
             confirmButtonColor: "#2E6F40", // dark green
             cancelButtonColor: "#dc2626", // red
-            confirmButtonText: "Yes, restore it!",
-            cancelButtonText: "Cancel",
+            confirmButtonText: t("yesRestored"),
+            cancelButtonText: t("cancel"),
             reverseButtons: true,
             background: "#f9fafb",
+
+            customClass: {
+                title: `${font}`,
+                htmlContainer: `${font}`,
+                confirmButton: `${font}`,
+                cancelButton: `${font}`,
+            },
         });
 
         if (result.isConfirmed) {
@@ -693,7 +707,7 @@ const Departments = () => {
                         }
                         description={
                             mode === "view"
-                                ? ""
+                                ? t("veiwDepartmentDesc")
                                 : mode === "edit"
                                 ? t("editDepartmentDesc")
                                 : translatedConfig.description

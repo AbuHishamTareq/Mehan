@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { Plus, Minus } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "../../lib/utils";
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from "../ui/sidebar";
 import type { MenuItem } from "../../../types/types";
@@ -37,58 +38,74 @@ export function SidebarMenuItemComponent({
     return (
         <SidebarMenuItem>
             <SidebarMenuButton asChild>
-                <NavLink
-                    to={item.url || "#"}
-                    end={!hasChildren}
-                    onClick={handleClick}
-                    className={cn(
-                        "flex items-center justify-between w-full px-2 py-2 rounded transition-colors hover:bg-primary/10 text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-primary overflow-visible",
-                        state === "collapsed" &&
-                            "justify-center px-0 py-3 h-14 flex-col"
-                    )}
-                >
-                    <div
+                {state === "collapsed" ? (
+                    // Tooltip for collapsed sidebar, including parents with children
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <NavLink
+                                to={item.url || "#"}
+                                end={!hasChildren}
+                                onClick={handleClick}
+                                className={cn(
+                                    "flex items-center justify-center w-full px-0 py-3 h-14 rounded transition-colors hover:bg-primary/10 text-gray-700 overflow-visible"
+                                )}
+                            >
+                                {Icon && (
+                                    <Icon
+                                        className={cn(
+                                            "transition-all duration-200 flex-shrink-0",
+                                            "h-6 w-6"
+                                        )}
+                                        color={item.iconColor}
+                                    />
+                                )}
+                                {hasChildren && (
+                                    <span className="sr-only">
+                                        {item.title}
+                                    </span>
+                                )}
+                            </NavLink>
+                        </TooltipTrigger>
+                        <TooltipContent side={isRTL ? "left" : "right"}>
+                            <span className={font}>{item.title}</span>
+                        </TooltipContent>
+                    </Tooltip>
+                ) : (
+                    <NavLink
+                        to={item.url || "#"}
+                        end={!hasChildren}
+                        onClick={handleClick}
                         className={cn(
-                            "flex items-center gap-3",
-                            isRTL ? "font-arabic" : "font-english",
-                            state === "collapsed" &&
-                                "w-full justify-center flex-col gap-1"
+                            "flex items-center justify-between w-full px-2 py-2 rounded transition-colors hover:bg-primary/10 text-gray-700 hover:text-primary overflow-visible"
                         )}
                     >
-                        {Icon && (
-                            <Icon
-                                className={cn(
-                                    "transition-all duration-200 flex-shrink-0",
-                                    state === "collapsed"
-                                        ? [
-                                              "h-6 w-6",
-                                              isRTL
-                                                  ? "mr-10 rtl:ml-3"
-                                                  : "ml-8 rtl:mr-3", // balanced spacing both sides
-                                          ]
-                                        : "h-5 w-5"
-                                )}
-                                color={item.iconColor}
-                            />
-                        )}
-                        {state !== "collapsed" && (
+                        <div className={cn("flex items-center gap-3", font)}>
+                            {Icon && (
+                                <Icon
+                                    className={cn(
+                                        "transition-all duration-200 flex-shrink-0 h-5 w-5"
+                                    )}
+                                    color={item.iconColor}
+                                />
+                            )}
                             <span className="text-sm font-medium text-sidebar-foreground">
                                 {item.title}
                             </span>
-                        )}
-                    </div>
+                        </div>
 
-                    {hasChildren && state !== "collapsed" && (
-                        <span>
-                            {isExpanded ? (
-                                <Minus className="w-5 h-5 text-white" />
-                            ) : (
-                                <Plus className="w-5 h-5 text-white" />
-                            )}
-                        </span>
-                    )}
-                </NavLink>
+                        {hasChildren && (
+                            <span>
+                                {isExpanded ? (
+                                    <Minus className="w-5 h-5 text-white" />
+                                ) : (
+                                    <Plus className="w-5 h-5 text-white" />
+                                )}
+                            </span>
+                        )}
+                    </NavLink>
+                )}
             </SidebarMenuButton>
+
             {/* Submenu */}
             {hasChildren && isExpanded && state !== "collapsed" && (
                 <div className={`${isRTL ? "mr-6" : "ml-6"} mt-1 space-y-1`}>
@@ -102,7 +119,7 @@ export function SidebarMenuItemComponent({
                                 key={child.id}
                                 to={child.url || "#"}
                                 end
-                                className="flex items-center gap-3 px-2 py-1 rounded-md text-sm hover:bg-primary/10 transition-colors text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                className="flex items-center gap-3 px-2 py-1 rounded-md text-sm hover:bg-primary/10 transition-colors text-gray-600 hover:text-primary"
                             >
                                 {child.icon && (
                                     <child.icon
@@ -126,9 +143,7 @@ export function SidebarMenuItemComponent({
                     <PopoverTrigger asChild>
                         <div
                             className={cn(
-                                "absolute inset-0 z-10 cursor-pointer",
-                                state === "collapsed" &&
-                                    "flex items-center justify-center w-full h-full"
+                                "absolute inset-0 z-10 cursor-pointer flex items-center justify-center w-full h-full"
                             )}
                         />
                     </PopoverTrigger>
@@ -155,7 +170,7 @@ export function SidebarMenuItemComponent({
                                         to={child.url || "#"}
                                         end
                                         onClick={() => setIsPopoverOpen(false)}
-                                        className="flex items-center gap-3 px-2 py-1 rounded-md text-sm hover:bg-primary/10 transition-colors text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+                                        className="flex items-center gap-3 px-2 py-1 rounded-md text-sm hover:bg-primary/10 transition-colors text-gray-600 hover:text-primary"
                                     >
                                         {child.icon && (
                                             <child.icon

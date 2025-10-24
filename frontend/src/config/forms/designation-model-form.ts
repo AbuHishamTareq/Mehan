@@ -10,7 +10,7 @@ export const DesignationModelFormConfig = {
         id: "add-designation",
         label: "",
         className:
-            "bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 cursor-pointer",
+            "bg-sidebar shadow-lg text-white rounded-sm px-4 py-2 hover:bg-sidebar hover:shadow-xl cursor-pointer",
         icon: CirclePlus,
         type: "button" as const,
         variant: "default" as const,

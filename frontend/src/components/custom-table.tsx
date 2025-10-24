@@ -13,6 +13,7 @@ export const CustomTable = ({
     onEdit,
     onDelete,
     onRestore,
+    onReset,
     isModel,
     from = 0,
     isLoading = false,
@@ -24,6 +25,7 @@ export const CustomTable = ({
     canDelete,
     canRestore,
     canView,
+    canReset,
     canActivateDeactivate,
 }: CustomTableProps & { isLoading?: boolean }) => {
     const { t, isRTL } = useLanguage();
@@ -60,7 +62,7 @@ export const CustomTable = ({
         <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
             <table className="w-full table-auto">
                 <thead>
-                    <tr className="bg-gradient-to-br from-[#6366f1] to-[#312e81] text-white">
+                    <tr className="bg-sidebar hover:bg-sidebar text-white">
                         {/* Checkbox column header */}
                         {enableSelection ? (
                             <th className="px-4 py-3 text-sm font-medium text-white">
@@ -189,10 +191,12 @@ export const CustomTable = ({
                                                     onEdit={onEdit}
                                                     onDelete={onDelete}
                                                     onRestore={onRestore}
+                                                    onReset={onReset}
                                                     canEdit={canEdit}
                                                     canDelete={canDelete}
                                                     canRestore={canRestore}
                                                     canView={canView}
+                                                    canReset={canReset}
                                                     isRTL={isRTL}
                                                 />
                                             </div>

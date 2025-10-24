@@ -1,6 +1,5 @@
 import {
     Controller,
-    type FieldError,
     type FieldValues,
     type Path,
     type PathValue,
@@ -41,13 +40,15 @@ export function CustomModelForm<T extends FieldValues>({
     onOpenChange,
     mode = "create",
     extraData,
+    userRole,
 }: CustomModelFormProps<T>) {
-    const { isRTL } = useLanguage();
+    const { t, isRTL } = useLanguage();
     const font = isRTL ? "font-arabic" : "font-english";
     // Filter fields for visibility based on mode
     const visibleFields = fields.filter((field) => {
         // Hide password in edit mode
-        if (field.type === "password" && mode === "edit") return false;
+        if (field.type === "password" && (mode === "edit" || mode === "view"))
+            return false;
 
         // Optionally hide confirm_password in view/edit modes
         if (field.name === "confirm_password" && mode !== "create")
@@ -77,13 +78,15 @@ export function CustomModelForm<T extends FieldValues>({
                 {/* Card Container */}
                 <div className="flex flex-col bg-white shadow-md rounded-lg overflow-hidden max-h-[90vh]">
                     {/* Card Header */}
-                    <div className="p-6 border-b">
-                        <DialogTitle className={`text-xl font-bold ${font}`}>
+                    <div className="p-2 border-b bg-sidebar">
+                        <DialogTitle
+                            className={`text-xl font-bold text-gray-200 ${font}`}
+                        >
                             {title}
                         </DialogTitle>
                         {description && (
                             <DialogDescription
-                                className={`text-sm text-gray-500 mt-1 ${font}`}
+                                className={`text-sm text-gray-400 mt-1 ${font}`}
                             >
                                 {description}
                             </DialogDescription>
@@ -100,7 +103,9 @@ export function CustomModelForm<T extends FieldValues>({
                                 <div key={field.key} className="grid gap-3">
                                     <Label
                                         htmlFor={field.id}
-                                        className={`${field.className ?? ""}`}
+                                        className={`${
+                                            field.className ?? ""
+                                        } font-bold`}
                                     >
                                         {field.label}
                                     </Label>
@@ -306,115 +311,284 @@ export function CustomModelForm<T extends FieldValues>({
                                             }
                                             render={({
                                                 field: { value, onChange },
-                                            }) => (
-                                                <div className="space-y-2">
-                                                    {Object.entries(
+                                                fieldState: { error },
+                                            }) => {
+                                                const allPermissions =
+                                                    Object.values(
                                                         extraData?.permissions ??
                                                             {}
-                                                    ).map(
-                                                        ([
-                                                            module,
-                                                            permissions,
-                                                        ]) => (
-                                                            <div
-                                                                key={module}
-                                                                className="mb-4 border-b pb-5"
-                                                            >
-                                                                <h4 className="capitalize text-sm font-bold">
-                                                                    {module}:
-                                                                </h4>
+                                                    ).flat() as PermissionProps[];
+                                                const allPermissionIds =
+                                                    allPermissions.map(
+                                                        (p) => p.id
+                                                    );
+                                                const allSelected =
+                                                    value.length ===
+                                                    allPermissionIds.length;
 
-                                                                <div className="ms-2 mt-2 grid grid-cols-3 gap-2">
-                                                                    {Array.isArray(
-                                                                        permissions
-                                                                    ) &&
-                                                                        permissions.map(
-                                                                            (
-                                                                                permission: PermissionProps
-                                                                            ) => (
-                                                                                <label
-                                                                                    key={
-                                                                                        permission.id
-                                                                                    }
-                                                                                    className={`flex items-center ${
-                                                                                        isRTL
-                                                                                            ? "space-x-reverse mr-4"
-                                                                                            : "ml-4"
-                                                                                    } space-x-2`}
-                                                                                >
-                                                                                    <input
-                                                                                        type="checkbox"
-                                                                                        className={`${
-                                                                                            field.className ??
-                                                                                            ""
-                                                                                        }`}
-                                                                                        value={
-                                                                                            permission.id
-                                                                                        }
-                                                                                        checked={value.includes(
-                                                                                            permission.id
-                                                                                        )}
-                                                                                        onChange={(
-                                                                                            e
-                                                                                        ) => {
-                                                                                            if (
-                                                                                                e
-                                                                                                    .target
-                                                                                                    .checked
-                                                                                            ) {
-                                                                                                onChange(
-                                                                                                    [
-                                                                                                        ...value,
-                                                                                                        permission.id,
-                                                                                                    ]
-                                                                                                );
-                                                                                            } else {
-                                                                                                onChange(
-                                                                                                    value.filter(
-                                                                                                        (
-                                                                                                            id: number
-                                                                                                        ) =>
-                                                                                                            id !==
-                                                                                                            permission.id
-                                                                                                    )
-                                                                                                );
-                                                                                            }
-                                                                                        }}
-                                                                                        disabled={
-                                                                                            mode ===
-                                                                                            "view"
-                                                                                        }
-                                                                                    />
-                                                                                    <span className="text-sm">
-                                                                                        {
-                                                                                            permission.label
-                                                                                        }
-                                                                                    </span>
-                                                                                </label>
+                                                const handleSelectAll = (
+                                                    checked: boolean
+                                                ) => {
+                                                    onChange(
+                                                        checked
+                                                            ? allPermissionIds
+                                                            : []
+                                                    );
+                                                };
+
+                                                const handleSelectGroup = (
+                                                    modulePermissions: PermissionProps[],
+                                                    checked: boolean
+                                                ) => {
+                                                    const moduleIds =
+                                                        modulePermissions.map(
+                                                            (p) => p.id
+                                                        );
+                                                    let newSelected = [
+                                                        ...value,
+                                                    ];
+
+                                                    if (checked) {
+                                                        // Add all module IDs that are not already present
+                                                        newSelected = [
+                                                            ...newSelected,
+                                                            ...moduleIds.filter(
+                                                                (id) =>
+                                                                    !newSelected.includes(
+                                                                        id
+                                                                    )
+                                                            ),
+                                                        ];
+                                                    } else {
+                                                        // Remove all module IDs
+                                                        newSelected =
+                                                            newSelected.filter(
+                                                                (id: number) =>
+                                                                    !moduleIds.includes(
+                                                                        id
+                                                                    )
+                                                            );
+                                                    }
+                                                    onChange(newSelected);
+                                                };
+
+                                                const isGroupSelected = (
+                                                    modulePermissions: PermissionProps[]
+                                                ) => {
+                                                    const moduleIds =
+                                                        modulePermissions.map(
+                                                            (p) => p.id
+                                                        );
+                                                    return moduleIds.every(
+                                                        (id) =>
+                                                            value.includes(id)
+                                                    );
+                                                };
+
+                                                return (
+                                                    <div className="space-y-2">
+                                                        {/* Select All Checkbox - Requirement 1 */}
+                                                        {userRole?.includes(
+                                                            "super_administrator"
+                                                        ) && (
+                                                            <div className="mb-4 border-b pb-5">
+                                                                <label
+                                                                    className={`flex items-center space-x-2 ${
+                                                                        isRTL
+                                                                            ? "space-x-reverse"
+                                                                            : ""
+                                                                    }`}
+                                                                >
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                                        checked={
+                                                                            allSelected
+                                                                        }
+                                                                        onChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            handleSelectAll(
+                                                                                e
+                                                                                    .target
+                                                                                    .checked
                                                                             )
+                                                                        }
+                                                                        disabled={
+                                                                            mode ===
+                                                                            "view"
+                                                                        }
+                                                                    />
+                                                                    <span
+                                                                        className={`text-sm font-bold ${font}`}
+                                                                    >
+                                                                        {t(
+                                                                            "selectAllPermissions"
                                                                         )}
-                                                                </div>
+                                                                    </span>
+                                                                </label>
                                                             </div>
-                                                        )
-                                                    )}
+                                                        )}
 
-                                                    {(
-                                                        errors[
-                                                            field.name as keyof T
-                                                        ] as unknown as FieldError
-                                                    )?.message && (
-                                                        <p className="text-red-500 text-sm mt-1">
-                                                            {
-                                                                (
-                                                                    errors[
-                                                                        field.name as keyof T
-                                                                    ] as unknown as FieldError
-                                                                ).message
-                                                            }
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            )}
+                                                        {Object.entries(
+                                                            extraData?.permissions ??
+                                                                ({} as Record<
+                                                                    string,
+                                                                    PermissionProps[]
+                                                                >)
+                                                        )
+                                                            .filter(
+                                                                ([module]) =>
+                                                                    userRole?.includes(
+                                                                        "super_administrator"
+                                                                    ) ||
+                                                                    ![
+                                                                        "Module",
+                                                                        "Permission",
+                                                                    ].includes(
+                                                                        module
+                                                                    )
+                                                            )
+                                                            .map(
+                                                                ([
+                                                                    module,
+                                                                    permissions,
+                                                                ]) => (
+                                                                    <div
+                                                                        key={
+                                                                            module
+                                                                        }
+                                                                        className="mb-4 border-b pb-5"
+                                                                    >
+                                                                        <div className="flex justify-between items-center">
+                                                                            <h4 className="capitalize text-sm font-bold">
+                                                                                {
+                                                                                    module
+                                                                                }
+
+                                                                                :
+                                                                            </h4>
+                                                                            {/* Select Group Checkbox - Requirement 2 */}
+                                                                            <label
+                                                                                className={`flex items-center space-x-2 ${
+                                                                                    isRTL
+                                                                                        ? "space-x-reverse"
+                                                                                        : ""
+                                                                                }`}
+                                                                            >
+                                                                                <span
+                                                                                    className={`text-sm font-bold ${font}`}
+                                                                                >
+                                                                                    {`${t(
+                                                                                        "allPermissionsFor"
+                                                                                    )} ${module}s`}
+                                                                                </span>
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                                                    checked={isGroupSelected(
+                                                                                        permissions as PermissionProps[]
+                                                                                    )}
+                                                                                    onChange={(
+                                                                                        e
+                                                                                    ) =>
+                                                                                        handleSelectGroup(
+                                                                                            permissions as PermissionProps[],
+                                                                                            e
+                                                                                                .target
+                                                                                                .checked
+                                                                                        )
+                                                                                    }
+                                                                                    disabled={
+                                                                                        mode ===
+                                                                                        "view"
+                                                                                    }
+                                                                                />
+                                                                            </label>
+                                                                        </div>
+
+                                                                        <div className="ms-2 mt-2 grid grid-cols-3 gap-2">
+                                                                            {Array.isArray(
+                                                                                permissions
+                                                                            ) &&
+                                                                                permissions.map(
+                                                                                    (
+                                                                                        permission: PermissionProps
+                                                                                    ) => (
+                                                                                        <label
+                                                                                            key={
+                                                                                                permission.id
+                                                                                            }
+                                                                                            className={`flex items-center ${
+                                                                                                isRTL
+                                                                                                    ? "space-x-reverse mr-4"
+                                                                                                    : "ml-4"
+                                                                                            } space-x-2`}
+                                                                                        >
+                                                                                            <input
+                                                                                                type="checkbox"
+                                                                                                className={`${
+                                                                                                    field.className ??
+                                                                                                    ""
+                                                                                                }`}
+                                                                                                value={
+                                                                                                    permission.id
+                                                                                                }
+                                                                                                checked={value.includes(
+                                                                                                    permission.id
+                                                                                                )}
+                                                                                                onChange={(
+                                                                                                    e
+                                                                                                ) => {
+                                                                                                    if (
+                                                                                                        e
+                                                                                                            .target
+                                                                                                            .checked
+                                                                                                    ) {
+                                                                                                        onChange(
+                                                                                                            [
+                                                                                                                ...value,
+                                                                                                                permission.id,
+                                                                                                            ]
+                                                                                                        );
+                                                                                                    } else {
+                                                                                                        onChange(
+                                                                                                            value.filter(
+                                                                                                                (
+                                                                                                                    id: number
+                                                                                                                ) =>
+                                                                                                                    id !==
+                                                                                                                    permission.id
+                                                                                                            )
+                                                                                                        );
+                                                                                                    }
+                                                                                                }}
+                                                                                                disabled={
+                                                                                                    mode ===
+                                                                                                    "view"
+                                                                                                }
+                                                                                            />
+                                                                                            <span className="text-sm">
+                                                                                                {
+                                                                                                    permission.label
+                                                                                                }
+                                                                                            </span>
+                                                                                        </label>
+                                                                                    )
+                                                                                )}
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            )}
+
+                                                        {error?.message && (
+                                                            <p className="text-red-500 text-sm mt-1">
+                                                                {error.message}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }}
                                         />
                                     ) : (
                                         /* OTHER INPUT TYPES */
@@ -449,7 +623,7 @@ export function CustomModelForm<T extends FieldValues>({
                         </div>
 
                         {/* Footer Buttons */}
-                        <div className="p-6 border-t flex justify-end gap-2">
+                        <div className="p-2 border-t flex justify-end gap-2 bg-sidebar">
                             {buttons.map((button) =>
                                 button.key === "cancel" ? (
                                     <DialogClose asChild key={button.key}>

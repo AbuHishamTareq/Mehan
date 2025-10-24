@@ -233,7 +233,7 @@ export const BulkAction = <T extends TableRow>({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className={`flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl ${font}`}
+                                    className={`flex items-center gap-2 bg-sidebar hover:bg-sidebar text-white shadow-lg hover:shadow-xl ${font}`}
                                 >
                                     <UserCheck className="w-4 h-4" />
                                     {t("statusAction")}
@@ -277,7 +277,7 @@ export const BulkAction = <T extends TableRow>({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className={`flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl ${font}`}
+                                    className={`flex items-center gap-2  bg-sidebar hover:bg-sidebar text-white shadow-lg hover:shadow-xl ${font}`}
                                 >
                                     <Download className="w-4 h-4" />
                                     <span>{t("exportActions")}</span>
@@ -471,7 +471,7 @@ export const BulkAction = <T extends TableRow>({
                             size="sm"
                             variant="outline"
                             onClick={onToggleImport}
-                            className={`bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl ${font}`}
+                            className={`bg-sidebar hover:bg-sidebar text-white shadow-lg hover:shadow-xl ${font}`}
                         >
                             <Upload className="w-4 h-4" />
                             {isImportOpen

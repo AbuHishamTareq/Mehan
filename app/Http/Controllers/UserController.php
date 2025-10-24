@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -303,6 +304,45 @@ class UserController extends Controller
         }
 
         $user->restore();
+
+        return response()->json([
+            "message" => "User restored successfully !",
+            "status" => 200
+        ], 200);
+    }
+
+    public function reset($id): JsonResponse
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                "message" => "User not found !",
+                "status" => 404
+            ], 404);
+        }
+
+        $newPassword = Str::random(10);
+
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        return response()->json([
+            "message" => "User password reset successfully !",
+            "status" => 200,
+            "new_password" => $newPassword
+        ], 200);
+    }
+
+    public function bulkDestroy(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            "ids" => "required|array|min:1",
+            "ids.*" => "integer|exists:users,id"
+        ]);
+
+        if ($validator->fails()) {
+        }
 
         return response()->json([
             "message" => "User restored successfully !",

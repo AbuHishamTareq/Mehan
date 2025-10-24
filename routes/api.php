@@ -99,6 +99,7 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
         Route::put("/activeDeactivate", [UserController::class, "activeDeactivate"])->name("setting.users.activeDeactivate");
         Route::delete("/destroy/{id}", [UserController::class, "destroy"])->name("setting.users.destroy");
         Route::patch("/restore/{id}", [UserController::class, "restore"])->name("setting.users.restore");
+        Route::patch("/reset/{id}", [UserController::class, "reset"])->name("setting.users.reset");
         Route::post('/import', [UserController::class, 'import'])->name('setting.users.import');
     });
 

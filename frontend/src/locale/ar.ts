@@ -100,6 +100,8 @@ const ar = {
     addNewPermission: "إضافة صلاحية جديدة",
     permissionDesc: "املأ التفاصيل أدناه لإضافة صلاحية جديدة.",
     editPermissionDesc: "قم بتعديل المعلومات أدناه لتحديث هذه الصلاحية.",
+    veiwPermissionDesc:
+        "عرض معلومات الصلاحية بشكل كامل في وضع القراءة فقط. لا يُسمح بإجراء أي تعديلات أو تغييرات في هذا العرض.",
 
     // Data Not Found Messages
     notFound: "لا توجد بيانات",
@@ -115,10 +117,14 @@ const ar = {
     roleDescription: "وصف الدور:",
     roleDescriptionPlaceholder: "أدخل وصف الدور",
     searchRole: "البحث عن دور ...",
-    editRole: "تعديل الدور",
-    viewRole: "عرض الدور",
+    editRole: "تعديل الأدوار",
+    viewRole: "عرض الأدوار",
     importRoles: "استيراد الأدوار",
-    editRoleDesc: "قم بتعديل المعلومات أدناه لتحديث الدور.",
+    editRoleDesc: "قم بتعديل المعلومات أدناه لتحديث الأدوار.",
+    selectAllPermissions: "حدد جميع الصلاحيات",
+    allPermissionsFor: "حدد جميع الصلاحيات لـ",
+    veiwRoleDesc:
+        "عرض معلومات الدور بشكل كامل في وضع القراءة فقط. لا يُسمح بإجراء أي تعديلات أو تغييرات في هذا العرض.",
 
     // Bulk Action
     bulkErrorMessage: "يجب عليك اختيار سجل واحد على الاقل.",
@@ -147,6 +153,8 @@ const ar = {
     deptImportNote:
         "قم بتحميل ملف اكسيل بالأعمدة المطلوبة.: English name, Arabic name",
     editDepartmentDesc: "قم بتعديل المعلومات أدناه لتحديث القسم.",
+    veiwDepartmentDesc:
+        "عرض معلومات القسم بشكل كامل في وضع القراءة فقط. لا يُسمح بإجراء أي تعديلات أو تغييرات في هذا العرض.",
 
     //Designations
     en_designation: "المسمى الوظيفي بالانجليزية",
@@ -167,6 +175,8 @@ const ar = {
     viewDesignation: "عرض المسمى الوظيفي",
     editDesignation: "تعديل المسمى الوظيفي",
     editDesignationDesc: "قم بتعديل المعلومات أدناه لتحديث المسمى الوظيفي.",
+    veiwDesignationDesc:
+        "عرض معلومات المسمى الوظيفي بشكل كامل في وضع القراءة فقط. لا يُسمح بإجراء أي تعديلات أو تغييرات في هذا العرض.",
 
     // Modules
     manageModules: "إدارة الوحدات البرمجية",
@@ -178,6 +188,8 @@ const ar = {
     viewModule: "عرض الوحدة البرمجية",
     searchModule: "البحث عن وحدة برمجية ...",
     editModuleDesc: "قم بتعديل المعلومات أدناه لتحديث الوحدة البرمجية.",
+    veiwModuleDesc:
+        "عرض معلومات الوحدة البرمجية بشكل كامل في وضع القراءة فقط. لا يُسمح بإجراء أي تعديلات أو تغييرات في هذا العرض.",
 
     // Buttons for Add and Edit
     cancel: "إلغاء",
@@ -198,6 +210,7 @@ const ar = {
     view: "عرض",
     delete: "حذف",
     restore: "إسترجاع",
+    reset: "إعادة تعيين كلمة المرور",
 
     // Importing
     downloadTemplate: "تحميل القالب",
@@ -252,9 +265,21 @@ const ar = {
     viewUser: "عرض المستخدم",
     editUser: "تعديل المستخدم",
     editUserDesc: "قم بتعديل المعلومات أدناه لتحديث المستخدم.",
+    veiwUserDesc:
+        "عرض معلومات المستخدم بشكل كامل في وضع القراءة فقط. لا يُسمح بإجراء أي تعديلات أو تغييرات في هذا العرض.",
 
     // Payments
     payments: "المدفوعات",
+
+    // SweetAlart2
+    areYouSure: "هل أنت متأكد؟",
+    deleteMessage: "أنت على وشك حذف",
+    yesDeleted: "نعم ، قم بحذفه",
+    restoreMessage: "أنت على وشك استرجاع",
+    yesRestored: "نعم ، قم باسترجاعه",
+    resetMessage: "أنت على وشك إعادة تعيين كلمة مرور",
+    yesReset: "نعم ، قم بإعادة تعيينها",
+    resetSuccess: "تم إعادة تعيين كلمة المرور بنجاح. كلمة المرور الجديدة هي:",
 };
 
 export default ar;

@@ -92,10 +92,12 @@ export interface TableActionButtonsProps {
     onEdit?: (row: TableRow) => void;
     onDelete?: (id: number) => void;
     onRestore?: (id: number) => void;
+    onReset?: (id: number) => void;
     canEdit?: boolean;
     canDelete?: boolean;
     canRestore?: boolean;
     canView?: boolean;
+    canReset?: boolean;
     isRTL?: boolean;
 }
 
@@ -108,6 +110,7 @@ export interface CustomTableProps {
     onEdit?: (row: TableRow) => void;
     onDelete?: (id: number) => void;
     onRestore?: (id: number) => void;
+    onReset?: (id: number) => void;
     from: number;
     enableSelection?: boolean;
     selectedRows?: number[];
@@ -117,6 +120,8 @@ export interface CustomTableProps {
     canDelete?: boolean;
     canRestore?: boolean;
     canView?: boolean;
+    canReset?: boolean;
+    isRTL?: boolean;
     canActivateDeactivate?: boolean;
 }
 
@@ -134,6 +139,7 @@ interface AddButtonProps {
         | "outline"
         | "link"
         | "destructive"
+        | "success"
         | undefined;
 }
 
@@ -148,6 +154,7 @@ interface ButtonProps {
         | "outline"
         | "link"
         | "destructive"
+        | "success"
         | undefined;
 }
 
@@ -198,6 +205,7 @@ export interface CustomModelFormProps<T extends FieldValues> {
     onOpenChange: (open: boolean) => void;
     mode: "create" | "view" | "edit";
     extraData?: ExtraData;
+    userRole?: string[];
 }
 
 // PERMISSIONS INTERFACE

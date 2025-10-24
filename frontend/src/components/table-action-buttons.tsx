@@ -12,10 +12,12 @@ export const TableActionButtons = ({
     onEdit,
     onDelete,
     onRestore,
+    onReset,
     canEdit,
     canDelete,
     canRestore,
     canView,
+    canReset,
     isRTL,
 }: TableActionButtonsProps) => {
     return (
@@ -73,6 +75,29 @@ export const TableActionButtons = ({
                                             onRestore?.(Number(row.id))
                                         }
                                         disabled={!row.removed_at}
+                                    >
+                                        <IconComponent size={18} />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {action.tooltip}
+                                </TooltipContent>
+                            </Tooltip>
+                        )
+                    );
+                }
+
+                // RESET
+                if (action.label === "Reset") {
+                    return (
+                        canReset && (
+                            <Tooltip key={`reset-${row.id}-${index}`}>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        className={`${action.className} ${marginClass}`}
+                                        onClick={() =>
+                                            onReset?.(Number(row.id))
+                                        }
                                     >
                                         <IconComponent size={18} />
                                     </Button>

@@ -92,6 +92,7 @@ const Users = () => {
     const canDelete = hasPermission(`delete_user`, userPermissions);
     const canView = hasPermission(`view_user`, userPermissions);
     const canRestore = hasPermission(`restore_user`, userPermissions);
+    const canReset = hasPermission(`reset_user_password`, userPermissions);
 
     const getUserSchema = (mode: "create" | "edit" | "view") =>
         yup.object({
@@ -348,16 +349,23 @@ const Users = () => {
         if (!user) return;
 
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: `You are about to delete "${user.name}" !`,
+            title: t("areYouSure"),
+            text: `${t("deleteMessage")} "${user.name}" !`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#dc2626", // red
             cancelButtonColor: "#6b7280", // gray
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel",
+            confirmButtonText: t("yesDeleted"),
+            cancelButtonText: t("cancel"),
             reverseButtons: true,
             background: "#f9fafb",
+
+            customClass: {
+                title: `${font}`,
+                htmlContainer: `${font}`,
+                confirmButton: `${font}`,
+                cancelButton: `${font}`,
+            },
         });
 
         if (result.isConfirmed) {
@@ -381,16 +389,23 @@ const Users = () => {
         if (!user) return;
 
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: `You are about to restore "${user.name}" !`,
+            title: t("areYouSure"),
+            text: `${t("restoreMessage")} "${user.name}" !`,
             icon: "question",
             showCancelButton: true,
             confirmButtonColor: "#2E6F40", // dark green
             cancelButtonColor: "#dc2626", // red
-            confirmButtonText: "Yes, restore it!",
-            cancelButtonText: "Cancel",
+            confirmButtonText: t("yesRestored"),
+            cancelButtonText: t("cancel"),
             reverseButtons: true,
             background: "#f9fafb",
+
+            customClass: {
+                title: `${font}`,
+                htmlContainer: `${font}`,
+                confirmButton: `${font}`,
+                cancelButton: `${font}`,
+            },
         });
 
         if (result.isConfirmed) {
@@ -402,6 +417,55 @@ const Users = () => {
                     variant: "success",
                     className: isRTL ? "font-arabic" : "font-english",
                 });
+                fetchUserData(searchValue, currentPerPage);
+            } catch (error) {
+                console.error("Somthing went wrong: ", error);
+            }
+        }
+    };
+
+    const handleReset = async (id: number) => {
+        const user = users.users.data.find((d) => d.id === id);
+        if (!user) return;
+
+        const result = await Swal.fire({
+            title: t("areYouSure"),
+            text: `${t("resetMessage")} "${user.name}" !`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#2E6F40", // dark green
+            cancelButtonColor: "#dc2626", // red
+            confirmButtonText: t("yesReset"),
+            cancelButtonText: t("cancel"),
+            reverseButtons: true,
+            background: "#f9fafb",
+
+            customClass: {
+                title: `${font}`,
+                htmlContainer: `${font}`,
+                confirmButton: `${font}`,
+                cancelButton: `${font}`,
+            },
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await UserController.resetUser(id);
+                console.log(response);
+
+                Swal.fire({
+                    title: `${t("resetSuccess")} "${response.new_password}"`,
+                    icon: "success",
+                    draggable: true,
+
+                    customClass: {
+                        title: `${font}`,
+                        htmlContainer: `${font}`,
+                        confirmButton: `${font}`,
+                        cancelButton: `${font}`,
+                    },
+                });
+
                 fetchUserData(searchValue, currentPerPage);
             } catch (error) {
                 console.error("Somthing went wrong: ", error);
@@ -764,12 +828,12 @@ const Users = () => {
                             mode === "view"
                                 ? t("viewUser")
                                 : mode === "edit"
-                                ? "editUser"
+                                ? t("editUser")
                                 : UserModelFormConfig.title
                         }
                         description={
                             mode === "view"
-                                ? ""
+                                ? t("veiwUserDesc")
                                 : mode === "edit"
                                 ? t("editUserDesc")
                                 : translatedConfig.description
@@ -800,6 +864,7 @@ const Users = () => {
                     onEdit={(row) => openModel("edit", row as UserProps)}
                     onDelete={handleDelete}
                     onRestore={handleRestore}
+                    onReset={handleReset}
                     isModel={true}
                     from={users.users.from}
                     enableSelection={true}
@@ -810,6 +875,7 @@ const Users = () => {
                     canDelete={canDelete}
                     canRestore={canRestore}
                     canView={canView}
+                    canReset={canReset}
                     canActivateDeactivate={canActivateDeactivate}
                 />
 

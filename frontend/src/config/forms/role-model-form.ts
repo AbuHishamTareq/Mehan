@@ -10,7 +10,7 @@ export const RoleModelFormConfig = {
         id: "add-role",
         label: "",
         className:
-            "bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 cursor-pointer",
+            "bg-sidebar shadow-lg text-white rounded-sm px-4 py-2 hover:bg-sidebar hover:shadow-xl cursor-pointer",
         icon: CirclePlus,
         type: "button" as const,
         variant: "default" as const,
@@ -25,6 +25,7 @@ export const RoleModelFormConfig = {
             type: "text" as const,
             placeholder: "",
             tabindex: 1,
+            className: "",
         },
         {
             id: "description",
@@ -41,9 +42,10 @@ export const RoleModelFormConfig = {
             id: "permissions",
             key: "permissions",
             name: "permissions[]",
-            label: "Permissions:",
+            label: "",
             type: "checkbox" as const,
             tabIndex: 3,
+            className: "text-md",
         },
     ],
     // FORM BUTTONS

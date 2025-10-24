@@ -47,11 +47,7 @@ export const Pagination = ({
 
             {/* Per page selector */}
             <div className="flex items-center">
-                <span
-                    className={`text-sm text-black ${font} ${
-                        isRTL ? "mr-2" : "ml-2"
-                    }`}
-                >
+                <span className={`text-sm ${font} me-2`}>
                     {t("rowPerPage")}:
                 </span>
                 <Select

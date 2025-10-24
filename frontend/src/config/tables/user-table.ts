@@ -71,5 +71,12 @@ export const UserTableConfig = {
             className:
                 "w-8 h-8 flex items-center justify-center rounded-lg bg-green-500 hover:bg-green-600 text-white",
         },
+        {
+            label: "Reset",
+            icon: "RefreshCcw" as keyof typeof LucidIcons,
+            tooltip: "reset",
+            className:
+                "w-8 h-8 flex items-center justify-center rounded-lg bg-purple-500 hover:bg-purple-600 text-white",
+        },
     ],
 };

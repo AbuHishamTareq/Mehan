@@ -275,7 +275,7 @@ const Modules = () => {
                         }
                         description={
                             mode === "view"
-                                ? ""
+                                ? t("veiwModuleDesc")
                                 : mode === "edit"
                                 ? t("editModuleDesc")
                                 : translatedConfig.description

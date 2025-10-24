@@ -4,15 +4,43 @@
 
 @font-face {
     font-family: "JannaLT";
-    src: url("./assets/fonts/Janna-LT-Bold.ttf") format("truetype");
+    src: url("./assets/fonts/Janna-LT-Regular.ttf") format("truetype");
     font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
-    font-family: "Inter";
-    src: url("./assets/fonts/Inter_24pt-Regular.ttf") format("truetype");
+    font-family: "JannaLT";
+    src: url("./assets/fonts/Janna-LT-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Cairo";
+    src: url("./assets/fonts/Cairo-Regular.ttf") format("truetype");
     font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Cairo";
+    src: url("./assets/fonts/Cairo-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("./assets/fonts/Roboto_Condensed-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("./assets/fonts/Roboto_Condensed-Bold.ttf") format("truetype");
+    font-weight: 700;
     font-style: normal;
 }
 
@@ -42,7 +70,7 @@ All colors MUST be HSL.
         --secondary-foreground: 0 0% 100%;
 
         --muted: 210 40% 96.1%;
-        --muted-foreground: 215.4 16.3% 46.9%;
+        --muted-foreground: 215.4 16.3% 79.9%;
 
         --accent: 217 91% 60%;
         --accent-foreground: 0 0% 100%;
@@ -83,7 +111,7 @@ All colors MUST be HSL.
 
         --radius: 0.5rem;
 
-        --sidebar-background: 225 30% 16%;
+        --sidebar-background: 225 30% 35%;
         --sidebar-foreground: 220 15% 85%;
         --sidebar-primary: 237 83% 60%;
         --sidebar-primary-foreground: 0 0% 100%;
@@ -92,7 +120,7 @@ All colors MUST be HSL.
         --sidebar-border: 225 20% 20%;
         --sidebar-ring: 237 83% 60%;
 
-        --icon-primary: 237 83% 60%;
+        --icon-primary: 237 83% 75%;
         --icon-success: 142 76% 36%;
         --icon-warning: 38 92% 50%;
         --icon-danger: 0 84% 60%;
@@ -196,4 +224,12 @@ All colors MUST be HSL.
 
 .bg-sidebar {
     background-color: hsl(var(--sidebar-background));
+}
+
+.font-arabic {
+    font-family: "Cairo", sans-serif;
+}
+
+.font-english {
+    font-family: "Roboto", sans-serif;
 }

@@ -58,6 +58,14 @@ export const UserController = {
         return data;
     },
 
+    // FUNCTION TO RESET USER PASSWORD
+    async resetUser(userId: number) {
+        const { data } = await api.patch(
+            "/api/users/reset/" + userId
+        );
+        return data;
+    },
+
     // ACTIVATE DEACTIVATE IN BULK OR PER SELECTED ITEM
     async bulkActivate(ids: number[]) {
         const { data } = await api.put("/api/users/bulkActivate", {

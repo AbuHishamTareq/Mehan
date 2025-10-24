@@ -16,7 +16,11 @@ export function LanguageSwitcher() {
             className="flex items-center gap-2 min-w-[80px] hover:bg-accent transition-colors"
         >
             <span className="text-lg">{language === "en" ? "🇸🇦" : "🇺🇸"}</span>
-            <span className="text-sm font-medium">
+            <span
+                className={`text-sm font-bold ${
+                    language === "en" ? "font-arabic" : "font-english"
+                }`}
+            >
                 {language === "en" ? "عربي" : "EN"}
             </span>
         </Button>
