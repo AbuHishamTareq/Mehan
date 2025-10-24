@@ -281,6 +281,12 @@ const en = {
     resetMessage: "You are about to reset password for",
     yesReset: "Yes, reset it!",
     resetSuccess: "Password reset successfully. The new password is: ",
+
+    // Unauthorized
+    unauthorized: "You Are Not Authorized",
+    unauthorizedDesc:
+        "Oops! It looks like you don't have permission to access this page. Please sign in or contact an administrator if you believe this is a mistake.",
+    unauthorizedStatus: "Error Code: 401 - Unauthorized Access",
 };
 
 export default en;

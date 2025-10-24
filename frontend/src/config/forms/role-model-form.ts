@@ -61,7 +61,7 @@ export const RoleModelFormConfig = {
             key: "submit",
             type: "submit" as const,
             label: "Save Changes",
-            variant: "default" as const,
+            variant: "success" as const,
             className: "cursor-pointer",
         },
     ],

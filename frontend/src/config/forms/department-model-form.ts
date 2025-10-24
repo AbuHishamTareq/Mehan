@@ -51,7 +51,7 @@ export const DepartmentModelFormConfig = {
             key: "submit",
             type: "submit" as const,
             label: "",
-            variant: "default" as const,
+            variant: "success" as const,
             className: "cursor-pointer",
         },
     ],

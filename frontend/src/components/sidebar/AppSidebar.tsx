@@ -71,6 +71,7 @@ export function AppSidebar() {
             url: "/settings",
             icon: Settings,
             iconColor: "hsl(var(--muted-foreground))",
+            permission: "access_settings_module",
             children: [
                 {
                     id: "general",
@@ -90,7 +91,7 @@ export function AppSidebar() {
                 {
                     id: "department",
                     title: t("departmentTitle"),
-                    url: "/settings/department",
+                    url: "/settings/departments",
                     permission: "access_department_module",
                     icon: Building2,
                     iconColor: "hsl(var(--muted-foreground))",
@@ -98,7 +99,7 @@ export function AppSidebar() {
                 {
                     id: "designation",
                     title: t("designationTitle"),
-                    url: "/settings/designation",
+                    url: "/settings/designations",
                     permission: "access_designation_module",
                     icon: IdCardLanyard,
                     iconColor: "hsl(var(--muted-foreground))",

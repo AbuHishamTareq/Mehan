@@ -10,6 +10,8 @@ import Permissions from "../views/settings/Permissions";
 import Departments from "../views/settings/Departments";
 import Designations from "../views/settings/Designations";
 import Modules from "../views/settings/Modules";
+import { ProtectedRoute } from "../lib/ProtectedRoute";
+import Unauthorized from "../views/Unauthorized";
 
 const router = createBrowserRouter([
     {
@@ -24,35 +26,63 @@ const router = createBrowserRouter([
                 path: "/",
                 element: <Dashboard />,
             },
-
+            // Unautorized Page
+            {
+                path: "/unauthorized",
+                element: <Unauthorized />,
+            },
             // Settings Routes:
             {
                 path: "/settings/general",
                 element: <General />,
             },
             {
-                path: "/settings/department",
-                element: <Departments />,
+                path: "/settings/departments",
+                element: (
+                    <ProtectedRoute permission="access_department_module">
+                        <Departments />
+                    </ProtectedRoute>
+                ),
             },
             {
-                path: "/settings/designation",
-                element: <Designations />,
+                path: "/settings/designations",
+                element: (
+                    <ProtectedRoute permission="access_designation_module">
+                        <Designations />
+                    </ProtectedRoute>
+                ),
             },
             {
                 path: "/settings/users",
-                element: <Users />,
+                element: (
+                    <ProtectedRoute permission="access_user_module">
+                        <Users />
+                    </ProtectedRoute>
+                ),
             },
             {
                 path: "/settings/permissions_roles",
-                element: <PermissionsAndRoles />,
+                element: (
+                    <ProtectedRoute permission="access_role_module">
+                        <PermissionsAndRoles />
+                    </ProtectedRoute>
+                ),
             },
             {
                 path: "/settings/permissions",
-                element: <Permissions />,
+                element: (
+                    <ProtectedRoute permission="access_permission_module">
+                        <Permissions />
+                    </ProtectedRoute>
+                ),
             },
             {
                 path: "/settings/modules",
-                element: <Modules />,
+                element: (
+                    <ProtectedRoute permission="access_module">
+                        <Modules />
+                    </ProtectedRoute>
+                ),
             },
         ],
     },

@@ -78,7 +78,7 @@ export function CustomModelForm<T extends FieldValues>({
                 {/* Card Container */}
                 <div className="flex flex-col bg-white shadow-md rounded-lg overflow-hidden max-h-[90vh]">
                     {/* Card Header */}
-                    <div className="p-2 border-b bg-sidebar">
+                    <div className="py-2 px-6 border-b bg-sidebar">
                         <DialogTitle
                             className={`text-xl font-bold text-gray-200 ${font}`}
                         >
@@ -623,7 +623,7 @@ export function CustomModelForm<T extends FieldValues>({
                         </div>
 
                         {/* Footer Buttons */}
-                        <div className="p-2 border-t flex justify-end gap-2 bg-sidebar">
+                        <div className="py-2 px-6 border-t flex justify-end gap-2 bg-sidebar">
                             {buttons.map((button) =>
                                 button.key === "cancel" ? (
                                     <DialogClose asChild key={button.key}>
